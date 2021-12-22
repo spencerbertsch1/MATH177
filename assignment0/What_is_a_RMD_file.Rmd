@@ -1,0 +1,23 @@
+Some new title
+========================================================
+
+This is an R Markdown document or RMD. Markdown is a simple formatting syntax for authoring web pages (click the **Help** toolbar button for more details on using R Markdown).
+
+
+
+```{r}
+# use command-option-i to create a new r chunk, seen here
+print('hello world')
+?cars
+str(cars)
+```
+
+We can also easily embed plots in our RMD script! 
+
+```{r fig.width=7, fig.height=3}
+plot(cars)
+```
+
+
+
+When you click the **Knit HTML** button a web page will be generated that includes both content as well as the output of any embedded R code chunks within the document.
