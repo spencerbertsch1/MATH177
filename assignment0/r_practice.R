@@ -7,9 +7,9 @@ wd <- getwd()
 print(wd)
 
 # set the working directory 
-setwd('/Users/spencerbertsch/Desktop/dev/r_practice')
+setwd('/Users/spencerbertsch/Desktop/dev/CS/MATH177')
 
-df <- read.csv('demo_data/stateData.csv')
+df <- read.csv('assignment0/demo_data/stateData.csv')
 
 # subset the data by one of the columns 
 northeast_states <- subset(df, state.region == 1)
@@ -19,4 +19,5 @@ northeast_states2 <- df[((df$state.region == 1) &
                            (df$population > 1000) & 
                            (df$income > 1000)), ]
 
+# print('something')
 
