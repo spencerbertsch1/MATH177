@@ -1,0 +1,48 @@
+---
+title: "Explore One Variable"
+output: html_notebook
+---
+
+* Insert a new code chunk: *Cmd+Option+I*
+* Run a code cell: *Cmd+Shift+Enter*
+* Preview the notebook HTML file: *Cmd+Shift+K*
+
+This notebook will be used to explore a single variable in a data set using the r programming language. 
+
+```{r}
+# set the working directory 
+setwd('/Users/spencerbertsch/Desktop/dev/CS/MATH177')
+
+# our file is tab separated, not comma separated 
+fb_df <- read.csv('assignment0/demo_data/pseudo_facebook.tsv', sep='\t')
+
+names(fb_df)  # <-- gives us the columns or "names" in the dataframe 
+```
+
+## Histogram of Users Birthdays
+```{r}
+# Let's look at a historgam of some user's birthdays 
+library(ggplot2)
+
+# here we look at the column headers (names) to get the column we want to plot 
+names(fb_df)
+
+qplot(x = dob_day, data = fb_df) + 
+  scale_x_continuous(breaks=1:31) + 
+  facet_wrap(~dob_month, ncol = 3)  # <-- facet_wrap allows us to easily create subplots based on difference columns! 
+```
+
+### Facet Wrap  - faceting over one variable 
+Here we can see a great use case of facet_wrap(), a ggplot2 function that lets us generate many of the same types of plots (here histograms), one for each unique catagory of the chosen facet column. 
+
+*facet_wrap(~variable_of_choice)*
+
+### Facet Grid - faceting over two or more variables 
+This is similar to facet_grid(), but facet_grid() takes two variables, one we split over the vertical direction, and one we split over the horizontal direction. 
+
+*facet_grid(vertical_variable~horizontal_variable)*
+
+
+
+
+
