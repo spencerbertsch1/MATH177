@@ -42,7 +42,37 @@ This is similar to facet_grid(), but facet_grid() takes two variables, one we sp
 
 *facet_grid(vertical_variable~horizontal_variable)*
 
+## Lets create histogram of friend counts
+```{r}
+qplot(x = friend_count, data = subset(fb_df, !is.na(gender)), binwidth = 25) + 
+  scale_x_continuous(limits = c(1, 1000), breaks = seq(0, 1000, 50)) + 
+  facet_wrap(~gender, ncol = 2)
+```
 
+```{r}
+by(fb_df$friend_count, fb_df$gender, summary)
+```
+
+## Now lets look at Tenure (how long a user has been on fb)
+We can plot the x axis over 365 to see the annual tenure! 
+```{r}
+qplot(x = tenure/365, data = fb_df, 
+      xlab = 'Tenure of FB User (Years)', 
+      ylab = 'Count of FB Users', 
+      binwidth = 0.25, color = I('black'), fill = I('#099DD9')) + 
+  scale_x_continuous(breaks = seq(0, 15, 1), lim = c(0, 7))
+```
+
+
+## Histogram of users by age 
+
+```{r}
+qplot(x = age, data = fb_df, 
+      xlab = 'Age of FB User (Years)', 
+      ylab = 'Count of FB Users', 
+      binwidth = 1, color = I('black'), fill = I('#FF9400')) + 
+  scale_x_continuous(breaks = seq(0, 120, 10))
+```
 
 
 
