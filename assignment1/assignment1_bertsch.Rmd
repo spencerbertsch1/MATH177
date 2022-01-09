@@ -1,0 +1,22 @@
+---
+title: "Assignment 1 - QBS 177"
+output: html_notebook
+---
+
+Spencer Bertsch  
+Jan. 2022
+
+------------
+
+* Insert a new code chunk: *Cmd+Option+I*
+* Run a code cell: *Cmd+Shift+Enter*
+* Preview the notebook HTML file: *Cmd+Shift+K*
+
+
+TODO do the homework assignment... 
+
+
+```{r}
+print('hello world')
+```
+
