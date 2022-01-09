@@ -223,20 +223,31 @@ Jan. 2022</p>
 <li>Run a code cell: <em>Cmd+Shift+Enter</em></li>
 <li>Preview the notebook HTML file: <em>Cmd+Shift+K</em></li>
 </ul>
-<p>TODO do the homework assignment…</p>
+<p><strong>1. Create three vectors x,y,z with integers and each vector has 3 elements. Combine the three vectors to become a 3×3 matrix A where each column represents a vector. (1 pt)</strong></p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucHJpbnQoJ2hlbGxvIHdvcmxkJylcbmBgYCJ9 -->
-<pre class="r"><code>print(&#39;hello world&#39;)</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxueCA8LSBjKDE6MylcbnkgPC0gYyg0OjYpXG56IDwtIGMoNzo5KVxuXG4jIEhlcmUgd2UgY2FuIHVzZSBjYmluZCB0byBob3Jpem9udGFsbHkgY29uY2F0ZW5hdGUgdGhlIHRocmVlIGluZGl2aWR1YWwgXG4jIG9uZSBkaW1lbnNpb25hbCB2ZWN0b3JzLiBcbm0gPC0gY2JpbmQoeCwgeSwgeilcbnByaW50KG0pXG5gYGAifQ== -->
+<pre class="r"><code>x &lt;- c(1:3)
+y &lt;- c(4:6)
+z &lt;- c(7:9)
+
+# Here we can use cbind to horizontally concatenate the three individual 
+# one dimensional vectors. 
+m &lt;- cbind(x, y, z)
+print(m)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFwiaGVsbG8gd29ybGRcIlxuIn0= -->
-<pre><code>[1] &quot;hello world&quot;</code></pre>
+<!-- rnb-output-begin eyJkYXRhIjoiICAgICB4IHkgelxuWzEsXSAxIDQgN1xuWzIsXSAyIDUgOFxuWzMsXSAzIDYgOVxuIn0= -->
+<pre><code>     x y z
+[1,] 1 4 7
+[2,] 2 5 8
+[3,] 3 6 9</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
+<p><strong>2. Create a vector with 12 integers. Convert the vector to a 4<em>3 matrix B using matrix(). Please also obtain the transpose matrix of B named tB. Now tB is a 3×4 matrix. By the rule of matrix multiplication in algebra, can we perform tB</em>tB in R language? (Is a 3×4 matrix multiplied by a 3×4 allowed?) What result would we get? (1 pt)</strong></p>
 <!-- rnb-text-end -->
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiQXNzaWdubWVudCAxIC0gUUJTIDE3NyIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKU3BlbmNlciBCZXJ0c2NoICAKSmFuLiAyMDIyCgotLS0tLS0tLS0tLS0KCiogSW5zZXJ0IGEgbmV3IGNvZGUgY2h1bms6ICpDbWQrT3B0aW9uK0kqCiogUnVuIGEgY29kZSBjZWxsOiAqQ21kK1NoaWZ0K0VudGVyKgoqIFByZXZpZXcgdGhlIG5vdGVib29rIEhUTUwgZmlsZTogKkNtZCtTaGlmdCtLKgoKClRPRE8gZG8gdGhlIGhvbWV3b3JrIGFzc2lnbm1lbnQuLi4gCgoKYGBge3J9CnByaW50KCdoZWxsbyB3b3JsZCcpCmBgYAoK</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiQXNzaWdubWVudCAxIC0gUUJTIDE3NyIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKU3BlbmNlciBCZXJ0c2NoICAKSmFuLiAyMDIyCgotLS0tLS0tLS0tLS0KCiogSW5zZXJ0IGEgbmV3IGNvZGUgY2h1bms6ICpDbWQrT3B0aW9uK0kqCiogUnVuIGEgY29kZSBjZWxsOiAqQ21kK1NoaWZ0K0VudGVyKgoqIFByZXZpZXcgdGhlIG5vdGVib29rIEhUTUwgZmlsZTogKkNtZCtTaGlmdCtLKgoKCioqMS4gIENyZWF0ZSB0aHJlZSB2ZWN0b3JzICB4LHkseiAgd2l0aCBpbnRlZ2VycyBhbmQgZWFjaCB2ZWN0b3IgaGFzIDMgZWxlbWVudHMuIENvbWJpbmUgdGhlIHRocmVlIHZlY3RvcnMgdG8gYmVjb21lIGEgM8OXMyBtYXRyaXggIEEgIHdoZXJlIGVhY2ggY29sdW1uIHJlcHJlc2VudHMgYSB2ZWN0b3IuICgxIHB0KSoqCmBgYHtyfQp4IDwtIGMoMTozKQp5IDwtIGMoNDo2KQp6IDwtIGMoNzo5KQoKIyBIZXJlIHdlIGNhbiB1c2UgY2JpbmQgdG8gaG9yaXpvbnRhbGx5IGNvbmNhdGVuYXRlIHRoZSB0aHJlZSBpbmRpdmlkdWFsIAojIG9uZSBkaW1lbnNpb25hbCB2ZWN0b3JzLiAKbSA8LSBjYmluZCh4LCB5LCB6KQpwcmludChtKQpgYGAKCgoqKjIuIENyZWF0ZSBhIHZlY3RvciB3aXRoIDEyIGludGVnZXJzLiBDb252ZXJ0IHRoZSB2ZWN0b3IgdG8gYSA0KjMgbWF0cml4ICBCICB1c2luZyAgbWF0cml4KCkuIFBsZWFzZSBhbHNvIG9idGFpbiB0aGUgdHJhbnNwb3NlIG1hdHJpeCBvZiAgQiAgbmFtZWQgIHRCLiBOb3cgIHRCICBpcyBhIDPDlzQgbWF0cml4LiBCeSB0aGUgcnVsZSBvZiBtYXRyaXggbXVsdGlwbGljYXRpb24gaW4gYWxnZWJyYSwgY2FuIHdlIHBlcmZvcm0gIHRCKnRCICBpbiBSIGxhbmd1YWdlPyAoSXMgYSAzw5c0IG1hdHJpeCBtdWx0aXBsaWVkIGJ5IGEgM8OXNCBhbGxvd2VkPykgV2hhdCByZXN1bHQgd291bGQgd2UgZ2V0PyAoMSBwdCkqKgoKCgoKCgo=</div>
 
 
 
