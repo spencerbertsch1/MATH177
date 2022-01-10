@@ -8,6 +8,7 @@ Jan. 2022
 
 ------------
 
+Some helpful commands: 
 * Insert a new code chunk: *Cmd+Option+I*
 * Run a code cell: *Cmd+Shift+Enter*
 * Preview the notebook HTML file: *Cmd+Shift+K*
@@ -136,6 +137,33 @@ plot(density(CLT_results))
 
 ```{r}
 # implement code here
-```
+n <-5000 # number of random trials
+K <- 1000 # number of tosses in each batch
+L <- 6 # number of sides of of the dice
 
+CLT_results <- c()
+#initialize a vector
+for(i in 1:n){
+
+  first_batch_toss <- sample(1:L, size=K, replace=T)
+  second_batch_toss <- sample(1:L, size=K, replace=T)
+  result_i <- sum(first_batch_toss) + sum(second_batch_toss)
+  
+  # append to vector
+  CLT_results <- c(CLT_results, result_i)
+
+}
+
+# also visualize a normal distribution
+x <- seq(-10, 10, by = .1)
+y <- dnorm(x, mean = 0, sd = 2)
+plot(x, y, type = "l", lty = 1, main="Normal Distribution")
+
+#visualize
+plot(density(CLT_results)) 
+hist(CLT_results, xlab="")
+```
+We can see from the above plots that by increasing the **K** parameter (number of tosses in each batch), we can make the resulting density plot reasonably bell shaped. 
+
+TODO talk about why this is the case because of the central limit theorem. 
 
