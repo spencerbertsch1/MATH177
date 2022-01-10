@@ -26,10 +26,116 @@ print(m)
 ```
 
 
-**2. Create a vector with 12 integers. Convert the vector to a 4*3 matrix  B  using  matrix(). Please also obtain the transpose matrix of  B  named  tB. Now  tB  is a 3×4 matrix. By the rule of matrix multiplication in algebra, can we perform  tB*tB  in R language? (Is a 3×4 matrix multiplied by a 3×4 allowed?) What result would we get? (1 pt)**
+**2. Create a vector with 12 integers. Convert the vector to a 4x3 matrix  B  using  matrix(). Please also obtain the transpose matrix of  B  named  tB. Now  tB  is a 3×4 matrix. By the rule of matrix multiplication in algebra, can we perform  tB \* tB  in R language? (Is a 3×4 matrix multiplied by a 3x4 allowed?) What result would we get? (1 pt)**
 
 
+Here we can create a 4x3 matrix using the matrix() method. By flipping the byrow parameter between TRUE 
+and FALSE we can either iterate down columns or across rows to generate the matrix. 
+```
+B <- matrix(data = vec, nrow = 4, ncol = 3, byrow = FALSE, dimnames = NULL)
+     [,1] [,2] [,3]
+[1,]    1    5    9
+[2,]    2    6   10
+[3,]    3    7   11
+[4,]    4    8   12
 
 
+B <- matrix(data = vec, nrow = 4, ncol = 3, byrow = TRUE, dimnames = NULL)
+     [,1] [,2] [,3]
+[1,]    1    2    3
+[2,]    4    5    6
+[3,]    7    8    9
+[4,]   10   11   12
+```
+
+
+```{r}
+vec <- c(1:12)
+# create a matrix B from the vector cev
+B <- matrix(data = vec, nrow = 4, ncol = 3, byrow = TRUE, dimnames = NULL)
+
+# transpose the matrix B
+tB <- t(B)
+
+```
+
+**By the rule of matrix multiplication in algebra, can we perform  tB x tB  in R language?**
+
+Yes and no. It depends on whether we are performing matrix multiplication or element-wise multiplication. 
+We can remember from linear algebra that we need the inner dimensions to match when we 
+perform matrix multiplication. For example, we could multiply a 3x5 matrix and a 5x4 matrix 
+together because there are the same number of columns in the first matrix as there are rows in 
+the second. 
+
+According the the most fundamental rules of linear algebra, no, a 3×4 matrix multiplied by a 3×4 
+NOT allowed because the inner dimensions do not match. However, this is where we can make a necessary
+distinction between matrix multiplication and element-wise multiplication of matrices. 
+
+In the R language, we can use matrix multiplication with the syntax: `A %*% B`, and we can implement 
+element-wise multiplication by using: `A * B`. If we're performing element-wise multiplication, then 
+yes of course we can multiply two 3x4 matrices together. 
+
+**Is a 3×4 matrix multiplied by a 3×4 allowed?** Yes if we're performing element-wise multiplication, `A * B` in R,
+no if we're performing matrix multiplication `A %*% B` in R. 
+
+**What result would we get?**  
+Here is the result of performing tB * tB:
+```{r}
+# Here we can see that element wise multiplication produces a resulting matrix as the 
+# input matrices. 
+tB * tB
+```
+
+And here we can see from the 'non-conformable arguments' error that we can't perform matrix multiplication on matrices in which the inner dimensions don't match. 
+```{r}
+tB %*% tB
+```
+
+**3. Generate a 10 x 10 matrix (square matrix)  A1  with proper number of random numbers, then generate another 10 x 12 matrix  A2. If we have  `A1*M = A2`  (Here * represents the conventional multiplication), please solve for  M.Hint: use the  runif()  and  solve()  functions. (1 pt)**
+
+```{r}
+# define the matrices A1 and A2
+A1 <- matrix(rpois(100, 10), nrow=10, ncol=10)
+A2 <- matrix(rpois(120, 10), nrow=10, ncol=12)
+
+# solve for M
+M <- solve(A1, A2)
+
+# check to make sure we got the correct answer
+answer <- A1 %*% M
+difference = max(abs(answer - A2))
+print(paste0("If A1*M = A2 is correct, then this should be zero: ", round(difference, 3)))
+```
+
+
+**4. Demonstrate Central Limit Theorem using the following pseudo code:**
+```
+n <-5000 # number of random trials
+K <- 1 # number of tosses in each batch
+L <- 6 # number of sides of of the dice
+
+CLT_results <- c()
+#initialize a vector
+for(i in 1:n){
+
+  first_batch_toss <- sample(1:L, size=K, replace=T)
+  second_batch_toss <- sample(1:L, size=K, replace=T)
+  result_i <- sum(first_batch_toss) + sum(second_batch_toss)
+  
+  # append to vector
+  CLT_results <- c(CLT_results, result_i)
+
+}
+
+#visualize
+hist(CLT_results, xlab="")
+plot(density(CLT_results)) 
+```
+**Sequentially increase the value in n, K and L. Determine which parameter can make the density plot reasonably bell shaped.  Explain why and relate to Central Limit Theorem. (2 pt)**
+
+
+```{r}
+# implement code here
+```
 
 

@@ -244,10 +244,121 @@ print(m)</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-<p><strong>2. Create a vector with 12 integers. Convert the vector to a 4<em>3 matrix B using matrix(). Please also obtain the transpose matrix of B named tB. Now tB is a 3×4 matrix. By the rule of matrix multiplication in algebra, can we perform tB</em>tB in R language? (Is a 3×4 matrix multiplied by a 3×4 allowed?) What result would we get? (1 pt)</strong></p>
+<p><strong>2. Create a vector with 12 integers. Convert the vector to a 4x3 matrix B using matrix(). Please also obtain the transpose matrix of B named tB. Now tB is a 3×4 matrix. By the rule of matrix multiplication in algebra, can we perform tB * tB in R language? (Is a 3×4 matrix multiplied by a 3x4 allowed?) What result would we get? (1 pt)</strong></p>
+<p>Here we can create a 4x3 matrix using the matrix() method. By flipping the byrow parameter between TRUE and FALSE we can either iterate down columns or across rows to generate the matrix.</p>
+<pre><code>B &lt;- matrix(data = vec, nrow = 4, ncol = 3, byrow = FALSE, dimnames = NULL)
+     [,1] [,2] [,3]
+[1,]    1    5    9
+[2,]    2    6   10
+[3,]    3    7   11
+[4,]    4    8   12
+
+
+B &lt;- matrix(data = vec, nrow = 4, ncol = 3, byrow = TRUE, dimnames = NULL)
+     [,1] [,2] [,3]
+[1,]    1    2    3
+[2,]    4    5    6
+[3,]    7    8    9
+[4,]   10   11   12</code></pre>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudmVjIDwtIGMoMToxMilcbiMgY3JlYXRlIGEgbWF0cml4IEIgZnJvbSB0aGUgdmVjdG9yIGNldlxuQiA8LSBtYXRyaXgoZGF0YSA9IHZlYywgbnJvdyA9IDQsIG5jb2wgPSAzLCBieXJvdyA9IFRSVUUsIGRpbW5hbWVzID0gTlVMTClcblxuIyB0cmFuc3Bvc2UgdGhlIG1hdHJpeCBCXG50QiA8LSB0KEIpXG5cbmBgYCJ9 -->
+<pre class="r"><code>vec &lt;- c(1:12)
+# create a matrix B from the vector cev
+B &lt;- matrix(data = vec, nrow = 4, ncol = 3, byrow = TRUE, dimnames = NULL)
+
+# transpose the matrix B
+tB &lt;- t(B)
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p><strong>By the rule of matrix multiplication in algebra, can we perform tB x tB in R language?</strong></p>
+<p>Yes and no. It depends on whether we are performing matrix multiplication or element-wise multiplication. We can remember from linear algebra that we need the inner dimensions to match when we perform matrix multiplication. For example, we could multiply a 3x5 matrix and a 5x4 matrix together because there are the same number of columns in the first matrix as there are rows in the second.</p>
+<p>According the the most fundamental rules of linear algebra, no, a 3×4 matrix multiplied by a 3×4 NOT allowed because the inner dimensions do not match. However, this is where we can make a necessary distinction between matrix multiplication and element-wise multiplication of matrices.</p>
+<p>In the R language, we can use matrix multiplication with the syntax: <code>A %*% B</code>, and we can implement element-wise multiplication by using: <code>A * B</code>. If we’re performing element-wise multiplication, then yes of course we can multiply two 3x4 matrices together.</p>
+<p><strong>Is a 3×4 matrix multiplied by a 3×4 allowed?</strong> Yes if we’re performing element-wise multiplication, <code>A * B</code> in R, no if we’re performing matrix multiplication <code>A %*% B</code> in R.</p>
+<p><strong>What result would we get?</strong><br />
+Here is the result of performing tB * tB:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudEIgKiB0QlxuYGBgIn0= -->
+<pre class="r"><code>tB * tB</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICAgICBbLDFdIFssMl0gWywzXSBbLDRdXG5bMSxdICAgIDEgICAxNiAgIDQ5ICAxMDBcblsyLF0gICAgNCAgIDI1ICAgNjQgIDEyMVxuWzMsXSAgICA5ICAgMzYgICA4MSAgMTQ0XG4ifQ== -->
+<pre><code>     [,1] [,2] [,3] [,4]
+[1,]    1   16   49  100
+[2,]    4   25   64  121
+[3,]    9   36   81  144</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>And here we can see from the ‘non-conformable arguments’ error that we can’t perform matrix multiplication on matrices in which the inner dimensions don’t match.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBIZXJlIHdlIGNhbiBzZWUgdGhhdCBlbGVtZW50IHdpc2UgbXVsdGlwbGljYXRpb24gcHJvZHVjZXMgYSByZXN1bHRpbmcgbWF0cml4IGFzIHRoZSBcbiMgaW5wdXQgbWF0cmljZXMuIFxudEIgJSolIHRCXG5gYGAifQ== -->
+<pre class="r"><code># Here we can see that element wise multiplication produces a resulting matrix as the 
+# input matrices. 
+tB %*% tB</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiRXJyb3IgaW4gdEIgJSolIHRCIDogbm9uLWNvbmZvcm1hYmxlIGFyZ3VtZW50c1xuIn0= -->
+<pre><code>Error in tB %*% tB : non-conformable arguments</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p><strong>3. Generate a 10 x 10 matrix (square matrix) A1 with proper number of random numbers, then generate another 10 x 12 matrix A2. If we have <code>A1*M = A2</code> (Here * represents the conventional multiplication), please solve for M.Hint: use the runif() and solve() functions. (1 pt)</strong></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBkZWZpbmUgdGhlIG1hdHJpY2VzIEExIGFuZCBBMlxuQTEgPC0gbWF0cml4KHJwb2lzKDEwMCwgMTApLCBucm93PTEwLCBuY29sPTEwKVxuQTIgPC0gbWF0cml4KHJwb2lzKDEyMCwgMTApLCBucm93PTEwLCBuY29sPTEyKVxuXG4jIHNvbHZlIGZvciBNXG5NIDwtIHNvbHZlKEExLCBBMilcblxuIyBjaGVjayB0byBtYWtlIHN1cmUgd2UgZ290IHRoZSBjb3JyZWN0IGFuc3dlclxuYW5zd2VyIDwtIEExICUqJSBNXG5kaWZmZXJlbmNlID0gbWF4KGFicyhhbnN3ZXIgLSBBMikpXG5wcmludChwYXN0ZTAoXCJJZiBBMSpNID0gQTIgaXMgY29ycmVjdCwgdGhlbiB0aGlzIHNob3VsZCBiZSB6ZXJvOiBcIiwgcm91bmQoZGlmZmVyZW5jZSwgMykpKVxuYGBgIn0= -->
+<pre class="r"><code># define the matrices A1 and A2
+A1 &lt;- matrix(rpois(100, 10), nrow=10, ncol=10)
+A2 &lt;- matrix(rpois(120, 10), nrow=10, ncol=12)
+
+# solve for M
+M &lt;- solve(A1, A2)
+
+# check to make sure we got the correct answer
+answer &lt;- A1 %*% M
+difference = max(abs(answer - A2))
+print(paste0(&quot;If A1*M = A2 is correct, then this should be zero: &quot;, round(difference, 3)))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFwiSWYgQTEqTSA9IEEyIGlzIGNvcnJlY3QsIHRoZW4gdGhpcyBzaG91bGQgYmUgemVybzogMFwiXG4ifQ== -->
+<pre><code>[1] &quot;If A1*M = A2 is correct, then this should be zero: 0&quot;</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p><strong>4. Demonstrate Central Limit Theorem using the following pseudo code:</strong></p>
+<pre><code>n &lt;-5000 # number of random trials
+K &lt;- 1 # number of tosses in each batch
+L &lt;- 6 # number of sides of of the dice
+
+CLT_results &lt;- c()
+#initialize a vector
+for(i in 1:n){
+
+  first_batch_toss &lt;- sample(1:L, size=K, replace=T)
+  second_batch_toss &lt;- sample(1:L, size=K, replace=T)
+  result_i &lt;- sum(first_batch_toss) + sum(second_batch_toss)
+  
+  # append to vector
+  CLT_results &lt;- c(CLT_results, result_i)
+
+}
+
+#visualize
+hist(CLT_results, xlab=&quot;&quot;)
+plot(density(CLT_results)) </code></pre>
+<p><strong>Sequentially increase the value in n, K and L. Determine which parameter can make the density plot reasonably bell shaped. Explain why and relate to Central Limit Theorem. (2 pt)</strong></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBpbXBsZW1lbnQgY29kZSBoZXJlXG5gYGAifQ== -->
+<pre class="r"><code># implement code here</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiQXNzaWdubWVudCAxIC0gUUJTIDE3NyIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKU3BlbmNlciBCZXJ0c2NoICAKSmFuLiAyMDIyCgotLS0tLS0tLS0tLS0KCiogSW5zZXJ0IGEgbmV3IGNvZGUgY2h1bms6ICpDbWQrT3B0aW9uK0kqCiogUnVuIGEgY29kZSBjZWxsOiAqQ21kK1NoaWZ0K0VudGVyKgoqIFByZXZpZXcgdGhlIG5vdGVib29rIEhUTUwgZmlsZTogKkNtZCtTaGlmdCtLKgoKCioqMS4gIENyZWF0ZSB0aHJlZSB2ZWN0b3JzICB4LHkseiAgd2l0aCBpbnRlZ2VycyBhbmQgZWFjaCB2ZWN0b3IgaGFzIDMgZWxlbWVudHMuIENvbWJpbmUgdGhlIHRocmVlIHZlY3RvcnMgdG8gYmVjb21lIGEgM8OXMyBtYXRyaXggIEEgIHdoZXJlIGVhY2ggY29sdW1uIHJlcHJlc2VudHMgYSB2ZWN0b3IuICgxIHB0KSoqCmBgYHtyfQp4IDwtIGMoMTozKQp5IDwtIGMoNDo2KQp6IDwtIGMoNzo5KQoKIyBIZXJlIHdlIGNhbiB1c2UgY2JpbmQgdG8gaG9yaXpvbnRhbGx5IGNvbmNhdGVuYXRlIHRoZSB0aHJlZSBpbmRpdmlkdWFsIAojIG9uZSBkaW1lbnNpb25hbCB2ZWN0b3JzLiAKbSA8LSBjYmluZCh4LCB5LCB6KQpwcmludChtKQpgYGAKCgoqKjIuIENyZWF0ZSBhIHZlY3RvciB3aXRoIDEyIGludGVnZXJzLiBDb252ZXJ0IHRoZSB2ZWN0b3IgdG8gYSA0KjMgbWF0cml4ICBCICB1c2luZyAgbWF0cml4KCkuIFBsZWFzZSBhbHNvIG9idGFpbiB0aGUgdHJhbnNwb3NlIG1hdHJpeCBvZiAgQiAgbmFtZWQgIHRCLiBOb3cgIHRCICBpcyBhIDPDlzQgbWF0cml4LiBCeSB0aGUgcnVsZSBvZiBtYXRyaXggbXVsdGlwbGljYXRpb24gaW4gYWxnZWJyYSwgY2FuIHdlIHBlcmZvcm0gIHRCKnRCICBpbiBSIGxhbmd1YWdlPyAoSXMgYSAzw5c0IG1hdHJpeCBtdWx0aXBsaWVkIGJ5IGEgM8OXNCBhbGxvd2VkPykgV2hhdCByZXN1bHQgd291bGQgd2UgZ2V0PyAoMSBwdCkqKgoKCgoKCgo=</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiQXNzaWdubWVudCAxIC0gUUJTIDE3NyIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKU3BlbmNlciBCZXJ0c2NoICAKSmFuLiAyMDIyCgotLS0tLS0tLS0tLS0KCiogSW5zZXJ0IGEgbmV3IGNvZGUgY2h1bms6ICpDbWQrT3B0aW9uK0kqCiogUnVuIGEgY29kZSBjZWxsOiAqQ21kK1NoaWZ0K0VudGVyKgoqIFByZXZpZXcgdGhlIG5vdGVib29rIEhUTUwgZmlsZTogKkNtZCtTaGlmdCtLKgoKCioqMS4gIENyZWF0ZSB0aHJlZSB2ZWN0b3JzICB4LHkseiAgd2l0aCBpbnRlZ2VycyBhbmQgZWFjaCB2ZWN0b3IgaGFzIDMgZWxlbWVudHMuIENvbWJpbmUgdGhlIHRocmVlIHZlY3RvcnMgdG8gYmVjb21lIGEgM8OXMyBtYXRyaXggIEEgIHdoZXJlIGVhY2ggY29sdW1uIHJlcHJlc2VudHMgYSB2ZWN0b3IuICgxIHB0KSoqCmBgYHtyfQp4IDwtIGMoMTozKQp5IDwtIGMoNDo2KQp6IDwtIGMoNzo5KQoKIyBIZXJlIHdlIGNhbiB1c2UgY2JpbmQgdG8gaG9yaXpvbnRhbGx5IGNvbmNhdGVuYXRlIHRoZSB0aHJlZSBpbmRpdmlkdWFsIAojIG9uZSBkaW1lbnNpb25hbCB2ZWN0b3JzLiAKbSA8LSBjYmluZCh4LCB5LCB6KQpwcmludChtKQpgYGAKCgoqKjIuIENyZWF0ZSBhIHZlY3RvciB3aXRoIDEyIGludGVnZXJzLiBDb252ZXJ0IHRoZSB2ZWN0b3IgdG8gYSA0eDMgbWF0cml4ICBCICB1c2luZyAgbWF0cml4KCkuIFBsZWFzZSBhbHNvIG9idGFpbiB0aGUgdHJhbnNwb3NlIG1hdHJpeCBvZiAgQiAgbmFtZWQgIHRCLiBOb3cgIHRCICBpcyBhIDPDlzQgbWF0cml4LiBCeSB0aGUgcnVsZSBvZiBtYXRyaXggbXVsdGlwbGljYXRpb24gaW4gYWxnZWJyYSwgY2FuIHdlIHBlcmZvcm0gIHRCIFwqIHRCICBpbiBSIGxhbmd1YWdlPyAoSXMgYSAzw5c0IG1hdHJpeCBtdWx0aXBsaWVkIGJ5IGEgM3g0IGFsbG93ZWQ/KSBXaGF0IHJlc3VsdCB3b3VsZCB3ZSBnZXQ/ICgxIHB0KSoqCgoKSGVyZSB3ZSBjYW4gY3JlYXRlIGEgNHgzIG1hdHJpeCB1c2luZyB0aGUgbWF0cml4KCkgbWV0aG9kLiBCeSBmbGlwcGluZyB0aGUgYnlyb3cgcGFyYW1ldGVyIGJldHdlZW4gVFJVRSAKYW5kIEZBTFNFIHdlIGNhbiBlaXRoZXIgaXRlcmF0ZSBkb3duIGNvbHVtbnMgb3IgYWNyb3NzIHJvd3MgdG8gZ2VuZXJhdGUgdGhlIG1hdHJpeC4gCmBgYApCIDwtIG1hdHJpeChkYXRhID0gdmVjLCBucm93ID0gNCwgbmNvbCA9IDMsIGJ5cm93ID0gRkFMU0UsIGRpbW5hbWVzID0gTlVMTCkKICAgICBbLDFdIFssMl0gWywzXQpbMSxdICAgIDEgICAgNSAgICA5ClsyLF0gICAgMiAgICA2ICAgMTAKWzMsXSAgICAzICAgIDcgICAxMQpbNCxdICAgIDQgICAgOCAgIDEyCgoKQiA8LSBtYXRyaXgoZGF0YSA9IHZlYywgbnJvdyA9IDQsIG5jb2wgPSAzLCBieXJvdyA9IFRSVUUsIGRpbW5hbWVzID0gTlVMTCkKICAgICBbLDFdIFssMl0gWywzXQpbMSxdICAgIDEgICAgMiAgICAzClsyLF0gICAgNCAgICA1ICAgIDYKWzMsXSAgICA3ICAgIDggICAgOQpbNCxdICAgMTAgICAxMSAgIDEyCmBgYAoKCmBgYHtyfQp2ZWMgPC0gYygxOjEyKQojIGNyZWF0ZSBhIG1hdHJpeCBCIGZyb20gdGhlIHZlY3RvciBjZXYKQiA8LSBtYXRyaXgoZGF0YSA9IHZlYywgbnJvdyA9IDQsIG5jb2wgPSAzLCBieXJvdyA9IFRSVUUsIGRpbW5hbWVzID0gTlVMTCkKCiMgdHJhbnNwb3NlIHRoZSBtYXRyaXggQgp0QiA8LSB0KEIpCgpgYGAKCioqQnkgdGhlIHJ1bGUgb2YgbWF0cml4IG11bHRpcGxpY2F0aW9uIGluIGFsZ2VicmEsIGNhbiB3ZSBwZXJmb3JtICB0QiB4IHRCICBpbiBSIGxhbmd1YWdlPyoqCgpZZXMgYW5kIG5vLiBJdCBkZXBlbmRzIG9uIHdoZXRoZXIgd2UgYXJlIHBlcmZvcm1pbmcgbWF0cml4IG11bHRpcGxpY2F0aW9uIG9yIGVsZW1lbnQtd2lzZSBtdWx0aXBsaWNhdGlvbi4gCldlIGNhbiByZW1lbWJlciBmcm9tIGxpbmVhciBhbGdlYnJhIHRoYXQgd2UgbmVlZCB0aGUgaW5uZXIgZGltZW5zaW9ucyB0byBtYXRjaCB3aGVuIHdlIApwZXJmb3JtIG1hdHJpeCBtdWx0aXBsaWNhdGlvbi4gRm9yIGV4YW1wbGUsIHdlIGNvdWxkIG11bHRpcGx5IGEgM3g1IG1hdHJpeCBhbmQgYSA1eDQgbWF0cml4IAp0b2dldGhlciBiZWNhdXNlIHRoZXJlIGFyZSB0aGUgc2FtZSBudW1iZXIgb2YgY29sdW1ucyBpbiB0aGUgZmlyc3QgbWF0cml4IGFzIHRoZXJlIGFyZSByb3dzIGluIAp0aGUgc2Vjb25kLiAKCkFjY29yZGluZyB0aGUgdGhlIG1vc3QgZnVuZGFtZW50YWwgcnVsZXMgb2YgbGluZWFyIGFsZ2VicmEsIG5vLCBhIDPDlzQgbWF0cml4IG11bHRpcGxpZWQgYnkgYSAzw5c0IApOT1QgYWxsb3dlZCBiZWNhdXNlIHRoZSBpbm5lciBkaW1lbnNpb25zIGRvIG5vdCBtYXRjaC4gSG93ZXZlciwgdGhpcyBpcyB3aGVyZSB3ZSBjYW4gbWFrZSBhIG5lY2Vzc2FyeQpkaXN0aW5jdGlvbiBiZXR3ZWVuIG1hdHJpeCBtdWx0aXBsaWNhdGlvbiBhbmQgZWxlbWVudC13aXNlIG11bHRpcGxpY2F0aW9uIG9mIG1hdHJpY2VzLiAKCkluIHRoZSBSIGxhbmd1YWdlLCB3ZSBjYW4gdXNlIG1hdHJpeCBtdWx0aXBsaWNhdGlvbiB3aXRoIHRoZSBzeW50YXg6IGBBICUqJSBCYCwgYW5kIHdlIGNhbiBpbXBsZW1lbnQgCmVsZW1lbnQtd2lzZSBtdWx0aXBsaWNhdGlvbiBieSB1c2luZzogYEEgKiBCYC4gSWYgd2UncmUgcGVyZm9ybWluZyBlbGVtZW50LXdpc2UgbXVsdGlwbGljYXRpb24sIHRoZW4gCnllcyBvZiBjb3Vyc2Ugd2UgY2FuIG11bHRpcGx5IHR3byAzeDQgbWF0cmljZXMgdG9nZXRoZXIuIAoKKipJcyBhIDPDlzQgbWF0cml4IG11bHRpcGxpZWQgYnkgYSAzw5c0IGFsbG93ZWQ/KiogWWVzIGlmIHdlJ3JlIHBlcmZvcm1pbmcgZWxlbWVudC13aXNlIG11bHRpcGxpY2F0aW9uLCBgQSAqIEJgIGluIFIsCm5vIGlmIHdlJ3JlIHBlcmZvcm1pbmcgbWF0cml4IG11bHRpcGxpY2F0aW9uIGBBICUqJSBCYCBpbiBSLiAKCioqV2hhdCByZXN1bHQgd291bGQgd2UgZ2V0PyoqICAKSGVyZSBpcyB0aGUgcmVzdWx0IG9mIHBlcmZvcm1pbmcgdEIgKiB0QjoKYGBge3J9CiMgSGVyZSB3ZSBjYW4gc2VlIHRoYXQgZWxlbWVudCB3aXNlIG11bHRpcGxpY2F0aW9uIHByb2R1Y2VzIGEgcmVzdWx0aW5nIG1hdHJpeCBhcyB0aGUgCiMgaW5wdXQgbWF0cmljZXMuIAp0QiAqIHRCCmBgYAoKQW5kIGhlcmUgd2UgY2FuIHNlZSBmcm9tIHRoZSAnbm9uLWNvbmZvcm1hYmxlIGFyZ3VtZW50cycgZXJyb3IgdGhhdCB3ZSBjYW4ndCBwZXJmb3JtIG1hdHJpeCBtdWx0aXBsaWNhdGlvbiBvbiBtYXRyaWNlcyBpbiB3aGljaCB0aGUgaW5uZXIgZGltZW5zaW9ucyBkb24ndCBtYXRjaC4gCmBgYHtyfQp0QiAlKiUgdEIKYGBgCgoqKjMuIEdlbmVyYXRlIGEgMTAgeCAxMCBtYXRyaXggKHNxdWFyZSBtYXRyaXgpICBBMSAgd2l0aCBwcm9wZXIgbnVtYmVyIG9mIHJhbmRvbSBudW1iZXJzLCB0aGVuIGdlbmVyYXRlIGFub3RoZXIgMTAgeCAxMiBtYXRyaXggIEEyLiBJZiB3ZSBoYXZlICBgQTEqTSA9IEEyYCAgKEhlcmUgKiByZXByZXNlbnRzIHRoZSBjb252ZW50aW9uYWwgbXVsdGlwbGljYXRpb24pLCBwbGVhc2Ugc29sdmUgZm9yICBNLkhpbnQ6IHVzZSB0aGUgIHJ1bmlmKCkgIGFuZCAgc29sdmUoKSAgZnVuY3Rpb25zLiAoMSBwdCkqKgoKYGBge3J9CiMgZGVmaW5lIHRoZSBtYXRyaWNlcyBBMSBhbmQgQTIKQTEgPC0gbWF0cml4KHJwb2lzKDEwMCwgMTApLCBucm93PTEwLCBuY29sPTEwKQpBMiA8LSBtYXRyaXgocnBvaXMoMTIwLCAxMCksIG5yb3c9MTAsIG5jb2w9MTIpCgojIHNvbHZlIGZvciBNCk0gPC0gc29sdmUoQTEsIEEyKQoKIyBjaGVjayB0byBtYWtlIHN1cmUgd2UgZ290IHRoZSBjb3JyZWN0IGFuc3dlcgphbnN3ZXIgPC0gQTEgJSolIE0KZGlmZmVyZW5jZSA9IG1heChhYnMoYW5zd2VyIC0gQTIpKQpwcmludChwYXN0ZTAoIklmIEExKk0gPSBBMiBpcyBjb3JyZWN0LCB0aGVuIHRoaXMgc2hvdWxkIGJlIHplcm86ICIsIHJvdW5kKGRpZmZlcmVuY2UsIDMpKSkKYGBgCgoKKio0LiBEZW1vbnN0cmF0ZSBDZW50cmFsIExpbWl0IFRoZW9yZW0gdXNpbmcgdGhlIGZvbGxvd2luZyBwc2V1ZG8gY29kZToqKgpgYGAKbiA8LTUwMDAgIyBudW1iZXIgb2YgcmFuZG9tIHRyaWFscwpLIDwtIDEgIyBudW1iZXIgb2YgdG9zc2VzIGluIGVhY2ggYmF0Y2gKTCA8LSA2ICMgbnVtYmVyIG9mIHNpZGVzIG9mIG9mIHRoZSBkaWNlCgpDTFRfcmVzdWx0cyA8LSBjKCkKI2luaXRpYWxpemUgYSB2ZWN0b3IKZm9yKGkgaW4gMTpuKXsKCiAgZmlyc3RfYmF0Y2hfdG9zcyA8LSBzYW1wbGUoMTpMLCBzaXplPUssIHJlcGxhY2U9VCkKICBzZWNvbmRfYmF0Y2hfdG9zcyA8LSBzYW1wbGUoMTpMLCBzaXplPUssIHJlcGxhY2U9VCkKICByZXN1bHRfaSA8LSBzdW0oZmlyc3RfYmF0Y2hfdG9zcykgKyBzdW0oc2Vjb25kX2JhdGNoX3Rvc3MpCiAgCiAgIyBhcHBlbmQgdG8gdmVjdG9yCiAgQ0xUX3Jlc3VsdHMgPC0gYyhDTFRfcmVzdWx0cywgcmVzdWx0X2kpCgp9CgojdmlzdWFsaXplCmhpc3QoQ0xUX3Jlc3VsdHMsIHhsYWI9IiIpCnBsb3QoZGVuc2l0eShDTFRfcmVzdWx0cykpIApgYGAKKipTZXF1ZW50aWFsbHkgaW5jcmVhc2UgdGhlIHZhbHVlIGluIG4sIEsgYW5kIEwuIERldGVybWluZSB3aGljaCBwYXJhbWV0ZXIgY2FuIG1ha2UgdGhlIGRlbnNpdHkgcGxvdCByZWFzb25hYmx5IGJlbGwgc2hhcGVkLiAgRXhwbGFpbiB3aHkgYW5kIHJlbGF0ZSB0byBDZW50cmFsIExpbWl0IFRoZW9yZW0uICgyIHB0KSoqCgoKYGBge3J9CiMgaW1wbGVtZW50IGNvZGUgaGVyZQpgYGAKCgo=</div>
 
 
 
