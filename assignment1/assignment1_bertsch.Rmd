@@ -8,10 +8,16 @@ Jan. 2022
 
 ------------
 
-Some helpful commands: 
-* Insert a new code chunk: *Cmd+Option+I*
-* Run a code cell: *Cmd+Shift+Enter*
-* Preview the notebook HTML file: *Cmd+Shift+K*
+Some helpful commands:  
+* Insert a new code chunk: *Cmd+Option+I*  
+* Run a code cell: *Cmd+Shift+Enter*  
+* Preview the notebook HTML file: *Cmd+Shift+K*  
+
+### Imports 
+```{r}
+library(glue)
+```
+
 
 
 **1.  Create three vectors  x,y,z  with integers and each vector has 3 elements. Combine the three vectors to become a 3×3 matrix  A  where each column represents a vector. (1 pt)**
@@ -154,16 +160,22 @@ for(i in 1:n){
 
 }
 
-# also visualize a normal distribution
+# also visualize a normal distribution for reference
 x <- seq(-10, 10, by = .1)
-y <- dnorm(x, mean = 0, sd = 2)
-plot(x, y, type = "l", lty = 1, main="Normal Distribution")
+y <- dnorm(x, mean = 0, sd = 2.4)
+plot(x, y, type = "l", lty = 1, main="Normal Distribution (For reference)")
 
 #visualize
-plot(density(CLT_results)) 
-hist(CLT_results, xlab="")
+plot(density(CLT_results), main=glue('Density plot for Dice Game, K: {K}.')) 
+hist(CLT_results, xlab="", main=glue('Histogram for Dice Game, K: {K}.'))
 ```
-We can see from the above plots that by increasing the **K** parameter (number of tosses in each batch), we can make the resulting density plot reasonably bell shaped. 
+We can see from the above plots that by increasing the **K** parameter (number of tosses in each batch), we can make the resulting density plot reasonably bell shaped. If instead we decrease **K** and take very *few* samples during each trial, then the resulting density plot resembles a triangular distribution. Let's see why a large **K** or `size` parameter in the `sample` R method is needed for the resulting distribution to be reasonably bell shaped.
 
-TODO talk about why this is the case because of the central limit theorem. 
+According to Boston University, "*The central limit theorem states that if you have a population with mean μ and standard deviation σ and take sufficiently large random samples from the population with replacement, then the distribution of the sample means will be approximately normally distributed.*" Source: [Central Limit Theorem - BU](https://sphweb.bumc.bu.edu/otlt/mph-modules/bs/bs704_probability/BS704_Probability12.html)
 
+An important takeaway here is that the number of random samples taken needs to be "sufficiently large" in order for the resulting distribution to approach normality. In R, we can sample an array of elements by using the `sample` method. This method takes a parameter called `size` which designates the number of elements that will be sampled from the array (with replacement) during each trial. Therefore we can see the central limit theoram proven visually by varying the `size` parameter which we call **K** in the above code to see the resulting density plot either approach a normal distribution for large **K** values, or approach a triangular distribution for small **K** values.  
+
+After reading [the BU article mentioned above](https://sphweb.bumc.bu.edu/otlt/mph-modules/bs/bs704_probability/BS704_Probability12.html), I found out that the central limit theorem works even on non-normally distributed data sets as long as the number of samples per trial is high enough. This makes sense because even for a very non-normal distribution such as a Poisson distribution, if we sample that distribution randomly say 100 times, then perform that trial of 100 samples again, we will likely get very similar results. The number of samples in each trial is the important thing here. If we sample only once per trial, then we will just get the original distribution back again. If, however, we increase the number of samples per trial to a high enough number then the results from each trial will begin to resemble a normal distribution. 
+
+Sources: 
+https://sphweb.bumc.bu.edu/otlt/mph-modules/bs/bs704_probability/BS704_Probability12.html
