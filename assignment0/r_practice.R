@@ -38,3 +38,5 @@ reddit_df$age.range <- relevel(reddit_df$age.range, "Under 18")
 
 qplot(data=reddit_df, x=age.range)
 
+
+
