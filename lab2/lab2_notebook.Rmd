@@ -21,12 +21,117 @@ library(glue)
 ### Set the owrking directory
 ```{r}
 # set the working directory 
-setwd('/Users/spencerbertsch/Desktop/dev/CS/MATH177')
+setwd('/Users/spencerbertsch/Desktop/dev/CS/MATH177/lab2')
 
 load('dbp.Rdata')
 ls()
 dbp[1:5,]
 ```
+
+# Problem 1
+---------
+## Train our logiistic regression model on a single feature: rs1112
+```{r}
+result.snp12 <- glm(affection ~ rs1112,
+               data = dbp,
+               family = binomial)
+
+print(result.snp12)
+```
+
+We can use the anova on the result of the logistic regression model to run a likelihood ratio test and get the deviance. We can then use the deviance to get the p-value. 
+```{r}
+anova(result.snp12)
+```
+
+
+We see that we have a very low p-value! Almost zero 
+```{r}
+pchisq(34.03, df=2, ncp=0, lower.tail=FALSE)
+```
+
+Find the logistic regression coefficients 
+```{r}
+summary(result.snp12)
+```
+
+
+## Odds Ratio Section
+We can now calculate the odds ratios for each of the Beta values. 
+```{r}
+print(glue('Odds Ratio for rs11123: {exp(coef(result.snp12)[2])}'))
+print(glue('Odds Ratio for rs11123: {exp(coef(result.snp12)[3])}'))
+```
+Odds ratio is like a surragate value for risk ratio! 
+
+```{r}
+table(dbp$affect, dbp$rs1112)
+```
+
+If a new subject has an rs1112 value of 2, then they would have a higher probability of being in the zero class. 
+
+
+## Converting Factor to Numeric
+Convert the Factor column of the data frame to a numeric data type
+```{r}
+dbp$rs1112 <- as.numeric(as.character(dbp$rs1112))
+```
+
+After this has been done, our logistic regression model no longer needs dummy variables! 
+The feature we're regressing on is numeric (not categorical) so our model only needs to 
+contain an intercept and a single Beta value. 
+
+## Train our logiistic regression
+```{r}
+result.snp12 <- glm(affection ~ rs1112,
+               data = dbp,
+               family = binomial)
+
+print(result.snp12)
+```
+
+
+```{r}
+anova(result.snp12)
+```
+
+We see that we have a very low p-value! Almost zero 
+```{r}
+pchisq(34.03, df=2, ncp=0, lower.tail=FALSE)
+```
+
+Find the logistic regression coefficients 
+```{r}
+coef(result.snp12)
+```
+
+
+# Question 2: Adjustment for the effects of covariates and of other SNPs
+
+Create a new, pruned dataframe 
+```{r}
+snp.data <- dbp[,c("affection", "trait", "sex", "age", "rs1112", "rs1117")]
+
+summary(snp.data)
+```
+
+
+```{r}
+snp.data$rs1112 <- as.numeric(as.character(dbp$rs1112))
+snp.data$rs1117 <- as.numeric(as.character(dbp$rs1117))
+```
+
+
+
+```{r}
+result.snp12 <- glm(affection ~ sex + age + rs1112,
+               data = dbp,
+               family = binomial)
+
+print(result.snp12)
+```
+
+
 
 
 
