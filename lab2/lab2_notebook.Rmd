@@ -1,0 +1,32 @@
+---
+title: "QBS 177 Lab 2"
+output: html_notebook
+---
+
+Spencer Bertsch  
+Jan. 2022
+
+------------
+
+Some helpful commands:  
+* Insert a new code chunk: *Cmd+Option+I*  
+* Run a code cell: *Cmd+Shift+Enter*  
+* Preview the notebook HTML file: *Cmd+Shift+K*  
+
+### Imports 
+```{r}
+library(glue)
+```
+
+### Set the owrking directory
+```{r}
+# set the working directory 
+setwd('/Users/spencerbertsch/Desktop/dev/CS/MATH177')
+
+load('dbp.Rdata')
+ls()
+dbp[1:5,]
+```
+
+
+
