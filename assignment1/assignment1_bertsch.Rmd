@@ -177,5 +177,6 @@ An important takeaway here is that the number of random samples taken needs to b
 
 After reading [the BU article mentioned above](https://sphweb.bumc.bu.edu/otlt/mph-modules/bs/bs704_probability/BS704_Probability12.html), I found out that the central limit theorem works even on non-normally distributed data sets as long as the number of samples per trial is high enough. This makes sense because even for a very non-normal distribution such as a Poisson distribution, if we sample that distribution randomly say 100 times, then perform that trial of 100 samples again, we will likely get very similar results. The number of samples in each trial is the important thing here. If we sample only once per trial, then we will just get the original distribution back again. If, however, we increase the number of samples per trial to a high enough number then the results from each trial will begin to resemble a normal distribution. 
 
+
 Sources: 
 https://sphweb.bumc.bu.edu/otlt/mph-modules/bs/bs704_probability/BS704_Probability12.html
