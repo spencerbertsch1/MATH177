@@ -1,0 +1,216 @@
+---
+title: "Assignment 2 - QBS 177"
+output: html_notebook
+---
+
+Spencer Bertsch  
+Jan. 2022
+
+------------
+
+Some helpful commands:  
+* Insert a new code chunk: *Cmd+Option+I*  
+* Run a code cell: *Cmd+Shift+Enter*  
+* Preview the notebook HTML file: *Cmd+Shift+K*  
+
+
+### Imports 
+```{r}
+library(glue)
+```
+
+First we need to change our current working directory to the correct directory for assignment 2
+```{r}
+setwd('/Users/spencerbertsch/Desktop/dev/phd_courses/MATH177/assignment2')
+getwd()
+```
+
+
+Now we can load our data into memory 
+```{r}
+load('dbp.Rdata')
+ls()
+dbp[1:5,]
+```
+
+# Question 1
+## Logistic regression on a single SNP genotype
+```{r}
+result.snp12 = glm (affection ~ rs1112, family=binomial("logit"), data=dbp)
+
+print(result.snp12)
+```
+
+
+From assignment: "The coefficients table lists the estimated values for the regression coefficients β as well as their standard errors. It further contains the P-values as obtained from a Wald test."
+```{r}
+print ( summary(result.snp12) )
+```
+
+
+```{r}
+# calculate the chi squared statistic for the trained logistic regression model 
+dev.genotypic = anova (result.snp12, test="Chi")
+print('Here we can see the results of the ANOVA:')
+print(dev.genotypic)
+
+lrt.pvalue = pchisq(dev.genotypic[dim(dev.genotypic)[1],"Deviance"], df=2, ncp=0, FALSE) 
+print (glue('And finally the P-value for the Likelihood Ratio Test for our Factor predictor {lrt.pvalue}'))
+```
+
+
+
+```{r}
+print ('Here we can see the summary of the logistic regression model')
+print (summary(result.snp12)$coefficients)
+```
+
+
+Here we can calculate the odds ratios for the two dummy variables that were generated when we modeled the rs1112 factor variable. We remember from class that we can obtain the odds ratio by simply raising *e* to the power of the beta value to get the odds ratio for that beta. 
+```{r}
+snp.beta = summary(result.snp12)$coefficients[2:3,1]
+
+print(glue('Beta value for dummy variable rs1113: {round(snp.beta[1], 6)}'))
+print(glue('Odds Ratio for dummy variable rs1113: {round(exp(snp.beta[1]), 6)}'))
+
+print(glue('Beta value for dummy variable rs1114: {round(snp.beta[2], 6)}'))
+print(glue('Odds Ratio for dummy variable rs1114: {round(exp(snp.beta[2]), 6)}'))
+```
+
+We can also find the the 95% confidence interval for the odds ratios calculated above! 
+```{r}
+ci = confint (result.snp12)
+print (ci) 
+print ( exp(ci) )
+```
+
+
+
+## Question 1 Part 2
+### Using a Numeric Predictor Variable
+In order to run an Allelic (Multiplicative) model, we need to change the data 
+type of our predictor variable from 'factor' to numeric. We do that below and run 
+our analysis of the resulting logistic regression model again. 
+
+```{r}
+snp.data = dbp[,c("affection", "rs1112")]
+print('Summary while the predictor variable (rs1112) is a factor variable;')
+summary(snp.data)
+
+snp.data[,"rs1112"] <- as.numeric(snp.data[,"rs1112"]) - 1
+print('Summary after the predictor variable (rs1112) was changed to a numeric variable:')
+summary(snp.data)
+
+```
+
+
+
+Now that our predictor variable rs1112 is numeric, we need to re-train the logistic regression model on the new (numeric) predictor variable. From assignment: "The coefficients table lists the estimated values for the regression coefficients β as well as their standard errors. It further contains the P-values as obtained from a Wald test." 
+```{r}
+#retrain the logistic regression model
+result.allelic = glm (affection ~ rs1112, family=binomial("logit"), data=snp.data)
+summary(result.allelic) 
+```
+
+Use Anova on the trained logistic regression model to find the Chi squared statistic
+```{r}
+dev.allelic = anova (result.allelic, test="Chi")
+print(dev.allelic)
+```
+
+Lastly we can find the p-value for the likelihod ratio test on the logistic regression model trained on the numeric predictor variable. 
+```{r}
+lrt.pvalue = pchisq(dev.allelic[dim(dev.allelic)[1],"Deviance"], df=2, ncp=0, FALSE) 
+print (glue('And lastly the p-value for the Likelihood Ratio Test for our Numeric predictor {lrt.pvalue}'))
+```
+
+# Question 2
+## Adjustment for the effects of covariates and of other SNPs
+
+For this question we will be using more than a single predictor variable. In order to make our lives easier we can create a subset of the initial dataframe that contains only the columns that we need for our analysis. 
+```{r}
+snp.data = dbp[,c("affection", "trait","sex", "age", "rs1112", "rs1117")]
+summary(snp.data)
+
+# here we remove 1 from each newly numeric column in the dataframe so that our values can range between [0, 1, 2] instead of [1, 2, 3]
+snp.data[,"rs1112"] <- as.numeric(snp.data[,"rs1112"]) - 1
+snp.data[,"rs1117"] <- as.numeric(snp.data[,"rs1117"]) - 1
+```
+
+
+```{r}
+result.adj = glm (affection ~ age + rs1112, family=binomial("logit"), data=snp.data)
+summary(result.adj)
+```
+
+
+
+```{r}
+result.adj = glm (affection ~ sex + rs1112, family=binomial("logit"), data=snp.data)
+summary(result.adj)
+```
+
+```{r}
+result.adj = glm (affection ~ sex + age + rs1112, family=binomial("logit"), 
+                  data=snp.data)
+summary(result.adj)
+```
+
+We can now adjust for the effects of other SNPs in the model! Here we are adjusting for the SNP rs1117 to determine whether or not it influences the model predictions. 
+```{r}
+result.adj = glm (affection ~ rs1117 + rs1112, family=binomial("logit"), data=snp.data)
+summary(result.adj)
+dev.adj = anova (result.adj, test="Chi")
+print(dev.adj)
+```
+
+And we can find the p-value for the likelihod ratio test on the logistic regression model adjusted for the effect of the other SNP: rs1117. 
+```{r}
+lrt.pvalue = pchisq(dev.adj[dim(dev.adj)[1],"Deviance"], df=2, ncp=0, FALSE) 
+print (glue('And lastly the p-value for the Likelihood Ratio Test for the logistic regression model adjusted for 1117 is {lrt.pvalue}'))
+```
+
+
+# Question 3
+### Analysis of quantitative instead of dichotomized trait
+
+Here we leave logistic regression behind and swap out our binned (binary) response variable for a continuous one. The binary response variable that we have been predicting is just a binned version of a continuous variable called 'trait'. We will now fit linear regression models to predict the 'trait' variable using the **lm** function in R. The trait here is the patient's blood pressure and the previous bucketed, binary response variable *affection* was 1 if the patient had abnormal blood pressure, and 0 if the blood pressure was considered normal.  
+
+
+Here we can run a regression model with a single predictor variable: SNP = rs1112. 
+```{r}
+result.adj = lm (trait ~ rs1112, data=snp.data)
+summary(result.adj)
+```
+
+
+Here we can run a regression model with the rs1112 predictor and also adjust for sex in the model. 
+```{r}
+result.adj = lm (trait ~ sex + rs1112, data=snp.data)
+summary(result.adj)
+```
+
+# Question 4
+## Gene-environment (GxE) and gene-gene (GxG) interaction
+
+This is an axciting section in which we get to discover how different variables interact with one another as they are used in a model. 
+
+```{r}
+result.inter = glm (affection ~ sex * rs1112, family=binomial("logit"), data=snp.data)
+summary(result.inter)
+```
+
+
+```{r}
+result.inter = glm (affection ~ age * rs1112, family=binomial("logit"), data=snp.data)
+summary(result.inter)
+```
+
+
+```{r}
+result.inter = glm (affection ~ rs1112 * rs1117, family=binomial("logit"), data=snp.data)
+summary(result.inter)
+```
+
+
+
