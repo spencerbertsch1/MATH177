@@ -1,0 +1,87 @@
+---
+title: "Lab 3 - QBS 177"
+output: html_notebook
+---
+
+Spencer Bertsch  
+Jan. 2022
+
+------------
+
+Some helpful commands:  
+* Insert a new code chunk: *Cmd+Option+I*  
+* Run a code cell: *Cmd+Shift+Enter*  
+* Preview the notebook HTML file: *Cmd+Shift+K*  
+
+
+### Imports 
+```{r}
+library(glue)
+```
+
+First we need to change our current working directory to the correct directory for lab3
+```{r}
+setwd('/Users/spencerbertsch/Desktop/dev/phd_courses/MATH177/lab3')
+getwd()
+```
+
+
+```{r}
+melanoma_df <- read.table("PCA.example.melanoma.txt",header=TRUE)
+mu = colMeans(melanoma_df)
+```
+
+
+```{r}
+for(i in 1:ncol(melanoma_df)){
+  if (i %% 500 == 0){
+    print(glue('Processing column {i} and replacing all NULL values with column mean...'))
+  }
+  melanoma_df[is.na(melanoma_df[,i]), i] <- round(mean(melanoma_df[,i], na.rm = TRUE))
+}
+```
+
+```{r}
+print(glue('We ca now double check that our new melanoma dataframe contains no nulls: {sum(is.na(melanoma_df))}'))
+
+```
+
+
+Here we can use principal component analysis to transform the initially high dimensional dataframe 
+```{r}
+melanoma_df.pc.eigen.cor <- prcomp(melanoma_df)
+```
+
+
+Note that the above command 'prcomp' is equivalent to finding the covariance matrix of the initial high-dimensional matrix, then find the eigenvalues of that matrix: 
+```
+df 
+c_df = cov(df)
+eighen(c_df)
+```
+
+```{r}
+names(melanoma_df.pc.eigen.cor)
+mel.scores.eigen <- melanoma_df.pc.eigen.cor$x
+mel.scores.rotation <- melanoma_df.pc.eigen.cor$rotation
+```
+
+```{r}
+Xhat = mel.scores.eigen[,1:nComp] %*% t(mel.scores.rotation[,1:nComp])
+# Xhat[1,]
+```
+
+
+```{r}
+cov_matrix <- cov(Xhat)
+```
+
+
+```{r}
+screeplot(melanoma_df.pc.eigen.cor, type = "l", npcs = 15, main = "Screeplot of the first 15 PCs")
+abline(h = 1, col="red", lty=5)
+legend("topright", legend=c("Eigenvalue = 1"),
+col=c("red"), lty=5, cex=0.6)
+```
+
+
