@@ -94,14 +94,17 @@ cor(t(pc1), lung.scores.eigen[,1])
 
 And indeed, we see that we get a correlation of 1. 
 
-We can now work backwards and reconstruct the covariance matrix using the roatations (loadings) and the eigenvalues that were generated using the `prcomp` command. 
+We can now work backwards and reconstruct the covariance matrix using the rotations (loadings) and the eigenvalues that were generated using the `prcomp` command. 
 
 ```{r}
-# first we XXXX 
-eigenvalue <- diag(lung.pc.eigen.cor$sdev^2)
+# first we get the variance of all the principal components by taking the square of the standard deviation vector
+lung.variance <- lung.pc.eigen.cor$sdev^2
 
-# then we YYYY
-newdata =(lung.pc.eigen.cor$rot)%*%eigenvalue%*%t(lung.pc.eigen.cor$rot)
+# then we take our vector of length (# variables) and we use it to create a diagonal matrix (here the vector is the main diagonal)
+eigenvalue <- diag(lung.variance)
+
+# then we multiply the rotation matrix 
+newdata = lung.rotation.eigen%*%eigenvalue%*%t(lung.rotation.eigen)
 ```
 
 
@@ -111,5 +114,129 @@ covdata <- cov(lung_df)
 sum(abs(newdata-covdata))
 ```
 
+And indeed we see a value that's very close to zero. We can approximate this as zero and assume that we have successfully reconstructed the covariance matrix by performing the following: 
+
+$COV = rotations \times diagonal\_variance \times rotations^T$
+
+
+### Use Singular Value Decomposition to perform PCA
+
+In addition to using the `prcomp` function to perform PCA, we can also use singular value decomposition achieve the same results. 
+```{r}
+start.time <- Sys.time()
+
+# scale our raw lung_df dataframe
+lung_df_scaled <- scale(lung_df, scale = FALSE)
+
+# use the 'svd' method to perform singular value decomposition on our newly scaled dataframe 
+lung.pc.scale.svd <- svd(lung_df_scaled);
+
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+time.taken
+```
+
+#### Runtime for Spectral Decomposition and SVD: 
+We can see that the singular value decomposition took **3.989584 mins**, while the PCA performed using spectral decomposition via the `prcomp` command took **4.649158 mins**. Spectral demposition took **roughly 15% longer** to complete than the SVD operation. 
+
+
+\n
+We can now examine the variance for the first 15 principle components: 
+```{r}
+screeplot(lung.pc.eigen.cor, type = "l", npcs = 15, main = "Screeplot of the first 15 PCs - Lung Data")
+abline(h = 1, col="red", lty=5)
+legend("topright", legend=c("Eigenvalue = 1"),
+col=c("red"), lty=5, cex=0.6)
+```
+
+We can see that the variance in the first three principle components are much higher than the rest, but that doesn't necessarily mean that they contain the majority of the variance for the entire matrix. We have so many (over 1,000) components that even small amount of explained variance in the smaller components can add up. 
+
+\n 
+We can now plot the cumulative variance for the same first 15 principle components: 
+
+```{r}
+cumpro <- cumsum(lung.pc.eigen.cor$sdev^2 / sum(lung.pc.eigen.cor $sdev^2))
+plot(cumpro[0:15], xlab = "PC #", ylab = "Amount of explained variance", main = "Cumulative variance plot")
+```
+
+And here indeed we can see that although there are much larger amounts of explained variance in the first three components, the cumulative explained variance for all three components is only ~0.038, or 3.8% of the explained variance. This just goes to show that although PCA can find the principle components that explain the most variance, you are often still losing a lot of information from the original matrix if you only use a handful of principle components. 
+
+
+\n 
+At this point we can plot the first two principle components against one another to visualize them: 
+```{r}
+plot(lung.scores.eigen[,1], lung.scores.eigen[,2], xlab="PCA 1", ylab="PCA 2")
+```
+
+We know that the last 505 samples include demographic information for three different populations (Europe, Africa, and Asia). We can extract and isolate the components representing each different population here: 
+
+```{r}
+plot(lung.scores.eigen[1:2830,1], lung.scores.eigen[1:2830,2],
+     type="p",col="black",pch=1,xlab="PC1", ylab="PC2", 
+     xlim = range(lung.scores.eigen[,1]), 
+     ylim = range(lung.scores.eigen[,2]));
+
+points(lung.scores.eigen[19662:19826,1], lung.scores.eigen[19662:19826,2], col="red",pch=20);
+points(lung.scores.eigen[19827:19963,1], lung.scores.eigen[19827:19963,2], col="green",pch=20)
+points(lung.scores.eigen[19964:20166,1], lung.scores.eigen[19964:20166,2], col="blue",pch=20)
+title(main="Principal Components Analysis using princomp in R", col.main="black", font.main=1,outer=T)
+```
+
+Now that we see our clusters, we can find the centroids of each one by taking the mean of only the data in that cluster: 
+
+```{r}
+lung.euro.centroid <- apply(lung.scores.eigen[19662:19826,1:2], 2, mean)
+lung.asian.centroid <- apply(lung.scores.eigen[19827:19963,1:2], 2, mean)
+lung.african.centroid <- apply(lung.scores.eigen[19964:20166,1:2],2,mean)
+
+print('The centroid for the European region is:')
+print(lung.euro.centroid)
+print('The centroid for the Asian region is:')
+print(lung.asian.centroid)
+print('The centroid for the African region is:')
+print(lung.african.centroid)
+```
+
+Now that we have our cluster centroids, we can associate each of our remaining 19,661 samples with its closest centroid based on the distance to each cluster. 
+
+Define a helper function that calculates the euclidean distance given two points
+```{r}
+find.distance = function(p1, p2) {
+  x1 = p1[1]
+  y1 = p1[2]
+  x2 = p2[1]
+  y2 = p2[2]
+  
+  d = sqrt( ((x2 - x1)^2) + ((y2 - y1)^2) )
+  return(d)
+}
+```
+
+
+
+```{r}
+cluster.data = function(point, euro.centroid, asian.centroid, african.centroid) {
+  print(point)
+  print(euro.centroid)
+  print(asian.centroid)
+  print(african.centroid)
+  
+  # determine Euclidean distance between the point and each cluster centroid 
+  d = find.distance(p1=point, p2=euro.centroid)
+  print(glue('Euro Distance: {d}'))
+  # return an encoded cluster 
+  
+  
+}
+```
+
+```{r}
+remaining_points <- lung.scores.eigen[0:19661,1:2]
+
+print(cluster.data(point = remaining_points[1,], 
+                   euro.centroid = lung.euro.centroid,
+                   asian.centroid = lung.asian.centroid,
+                   african.centroid = lung.african.centroid))
+```
 
 
