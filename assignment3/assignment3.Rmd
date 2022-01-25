@@ -172,6 +172,7 @@ plot(lung.scores.eigen[,1], lung.scores.eigen[,2], xlab="PCA 1", ylab="PCA 2")
 We know that the last 505 samples include demographic information for three different populations (Europe, Africa, and Asia). We can extract and isolate the components representing each different population here: 
 
 ```{r}
+par(oma=c(0,0,2,0))
 plot(lung.scores.eigen[1:2830,1], lung.scores.eigen[1:2830,2],
      type="p",col="black",pch=1,xlab="PC1", ylab="PC2", 
      xlim = range(lung.scores.eigen[,1]), 
@@ -243,6 +244,9 @@ cluster.data = function(point, euro.centroid, asian.centroid, african.centroid) 
 }
 ```
 
+
+
+
 ```{r}
 remaining_points <- lung.scores.eigen[0:19661,1:2]
 
@@ -287,6 +291,7 @@ africa_array<-matrix(africa_points, nrow=c(africa, 2)[1], byrow=TRUE)
 
 
 ```{r}
+par(oma=c(0,0,2,0))
 plot(lung.scores.eigen[1:2830,1], lung.scores.eigen[1:2830,2],
      type="p",col="white",pch=1,xlab="PC1", ylab="PC2", 
      xlim = range(lung.scores.eigen[,1]), 
@@ -296,6 +301,7 @@ points(asia_array[, 1], asia_array[, 2], col="green",pch=20);
 points(europe_array[, 1], europe_array[, 2], col="red",pch=20);
 points(africa_array[, 1], africa_array[, 2], col="blue",pch=20);
 title(main="Principal Components Analysis using princomp in R", col.main="black", font.main=1,outer=T)
+
 ```
 
 
