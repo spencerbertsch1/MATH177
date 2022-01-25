@@ -17,6 +17,7 @@ Some helpful commands:
 ### Imports 
 ```{r}
 library(glue)
+library(reticulate)
 ```
 
 First we need to change our current working directory to the correct directory for Assignment 3
@@ -216,16 +217,28 @@ find.distance = function(p1, p2) {
 
 ```{r}
 cluster.data = function(point, euro.centroid, asian.centroid, african.centroid) {
-  print(point)
-  print(euro.centroid)
-  print(asian.centroid)
-  print(african.centroid)
+  # print(point)
+  # print(euro.centroid)
+  # print(asian.centroid)
+  # print(african.centroid)
   
   # determine Euclidean distance between the point and each cluster centroid 
-  d = find.distance(p1=point, p2=euro.centroid)
-  print(glue('Euro Distance: {d}'))
-  # return an encoded cluster 
-  
+  d_euro = find.distance(p1=point, p2=euro.centroid)
+  d_asia = find.distance(p1=point, p2=asian.centroid)
+  d_africa = find.distance(p1=point, p2=african.centroid)
+
+  if ((d_euro < d_asia) & (d_euro < d_africa)) { 
+    # print('This point belongs to the European cluster!')
+    return(1)
+    } else if ((d_asia < d_euro) & (d_asia < d_africa)) {
+    # print('This point belongs to the European cluster!')
+    return(2)
+    } else if  ((d_africa < d_euro) & (d_africa < d_asia)) {
+    # print('This point belongs to the European cluster!')
+    return(3)
+    } else {
+    print('Two or more clusters are equidistant... we should never get here!')
+}
   
 }
 ```
@@ -233,10 +246,56 @@ cluster.data = function(point, euro.centroid, asian.centroid, african.centroid) 
 ```{r}
 remaining_points <- lung.scores.eigen[0:19661,1:2]
 
-print(cluster.data(point = remaining_points[1,], 
+euro_points <- list()
+asia_points <- list()
+africa_points <- list()
+
+euro = 0
+asia = 0
+africa = 0
+
+# iterate through 19661 samples 
+for(i in 1:19661){
+  c_number <- cluster.data(point = remaining_points[i,], 
                    euro.centroid = lung.euro.centroid,
                    asian.centroid = lung.asian.centroid,
-                   african.centroid = lung.african.centroid))
+                   african.centroid = lung.african.centroid)
+  if (c_number == 1){
+    euro = euro + 1
+    euro_points <- c(euro_points, c(remaining_points[i,][1], remaining_points[i,][2]))
+  }
+  else if (c_number == 2){
+      asia = asia + 1
+      asia_points <- c(asia_points, c(remaining_points[i,][1], remaining_points[i,][2]))
+  } else{
+    africa = africa + 1
+    africa_points <- c(africa_points, c(remaining_points[i,][1], remaining_points[i,][2]))
+  }
+}
+
+
+```
+
+
+
+```{r}
+asia_array<-matrix(asia_points, nrow=c(asia, 2)[1], byrow=TRUE)
+europe_array<-matrix(euro_points, nrow=c(euro, 2)[1], byrow=TRUE)
+africa_array<-matrix(africa_points, nrow=c(africa, 2)[1], byrow=TRUE)
+```
+
+
+
+```{r}
+plot(lung.scores.eigen[1:2830,1], lung.scores.eigen[1:2830,2],
+     type="p",col="white",pch=1,xlab="PC1", ylab="PC2", 
+     xlim = range(lung.scores.eigen[,1]), 
+     ylim = range(lung.scores.eigen[,2]));
+
+points(asia_array[, 1], asia_array[, 2], col="green",pch=20);
+points(europe_array[, 1], europe_array[, 2], col="red",pch=20);
+points(africa_array[, 1], africa_array[, 2], col="blue",pch=20);
+title(main="Principal Components Analysis using princomp in R", col.main="black", font.main=1,outer=T)
 ```
 
 
