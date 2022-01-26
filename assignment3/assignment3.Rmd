@@ -201,7 +201,7 @@ print(lung.african.centroid)
 
 Now that we have our cluster centroids, we can associate each of our remaining 19,661 samples with its closest centroid based on the distance to each cluster. 
 
-Define a helper function that calculates the euclidean distance given two points
+Here I define a helper function that calculates the euclidean distance given two points. The first point **p1** will be the point gathered from the first two principal components of the sample that we want to cluster. The second point **p2** will be the centroid of one of the three clusters found above. 
 ```{r}
 find.distance = function(p1, p2) {
   x1 = p1[1]
@@ -215,7 +215,7 @@ find.distance = function(p1, p2) {
 ```
 
 
-
+Now that we have a helper function that can find the Euclidean distance between two points, we can use that to associate a given point with either the European centroid, the Asian centroid, or the African centroid. This *cluster.data* function can then be run each of the remaining 19,661 samples so we can associate each one with it's closest centroid. 
 ```{r}
 cluster.data = function(point, euro.centroid, asian.centroid, african.centroid) {
   # print(point)
@@ -246,7 +246,10 @@ cluster.data = function(point, euro.centroid, asian.centroid, african.centroid) 
 
 
 
+And at last we now have everything we need in order to associate the remaining 19,661 samples with one of the three cluster centroids. Here we can iterate through each sample and extract the values from the first two principle components, I do that be calling `remaining_points` which is a variable that contains the remaining 19,661 principle components that need to be sorted. I then call the above function that finds the closest centroid for each sample, then I add the sample to a bucket that corresponds to its closest centroid. 
 
+\n
+Just for good measure, I also keep count of how many samples are associated with each cluster centroid and print that below as well. 
 ```{r}
 remaining_points <- lung.scores.eigen[0:19661,1:2]
 
@@ -281,6 +284,15 @@ for(i in 1:19661){
 ```
 
 
+And with that finished, we now have our buckets filled with the points that are closest to each cluster centroid! Let's examine how many points there were in each bucket: 
+
+```{r}
+print(glue('The number of samples that were closest to the European centroid: {euro}'))
+print(glue('The number of samples that were closest to the Asian centroid: {asia}'))
+print(glue('The number of samples that were closest to the African centroid: {africa}'))
+```
+
+And here we can see a large disparity in the number of points that were closest to each centroid. That leads me to believe that the subjects samples for this study came mostly from continental Europe. Now we can concatenate the vectors of values in each of the lists (buckets) that represent each cluster center so we can move on to plotting. 
 
 ```{r}
 asia_array<-matrix(asia_points, nrow=c(asia, 2)[1], byrow=TRUE)
@@ -288,7 +300,7 @@ europe_array<-matrix(euro_points, nrow=c(euro, 2)[1], byrow=TRUE)
 africa_array<-matrix(africa_points, nrow=c(africa, 2)[1], byrow=TRUE)
 ```
 
-
+Great, now we can finally use the plotting code from class so generate the new plot in which each point is color coded and associated with a cluster center! 
 
 ```{r}
 par(oma=c(0,0,2,0))
@@ -303,5 +315,7 @@ points(africa_array[, 1], africa_array[, 2], col="blue",pch=20);
 title(main="Principal Components Analysis using princomp in R", col.main="black", font.main=1,outer=T)
 
 ```
+And here we can see that although there are a different number of points that were clustered into each region, we see a generally even split visually for the European, Asian, and African regions. The above plot shows the results of using the first two components of our rotated data and finding the closest centroid using Euclidean distance and cloloring each point based on which centroid (region) it's closest to. Here the red dots represent that the closest centroid was Europe, green dots represent that the closest centroid was Asia, and blue dots represent that the closest centroid was Africa. 
+
 
 
