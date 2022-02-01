@@ -41,6 +41,12 @@ for(i in 1:ncol(melanoma_df)){
 }
 ```
 
+
+```{r}
+mu = colMeans(melanoma_df)
+```
+
+
 ```{r}
 print(glue('We ca now double check that our new melanoma dataframe contains no nulls: {sum(is.na(melanoma_df))}'))
 
