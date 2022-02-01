@@ -1,0 +1,208 @@
+---
+title: "Assignment 4 - QBS 177"
+output: html_notebook
+---
+
+Spencer Bertsch  
+Jan. 2022
+
+------------
+
+Some helpful commands:  
+* Insert a new code chunk: *Cmd+Option+I*  
+* Run a code cell: *Cmd+Shift+Enter*  
+* Preview the notebook HTML file: *Cmd+Shift+K*  
+
+
+
+
+
+### Imports 
+```{r}
+library(glue)
+library(qqman)
+```
+
+First we need to change our current working directory to the correct directory for Assignment 3
+```{r}
+setwd('/Users/spencerbertsch/Desktop/dev/phd_courses/MATH177/assignment4')
+getwd()
+```
+
+### Import the raw data 
+```{r}
+load('lab1.Rdata')
+```
+
+
+Here we can transform the subpopulation data into 21 countries instead of 25. We need this to be the case later on 
+```{r}
+chn <- (fulldat[,5] + fulldat[,6])/2
+ind <- (fulldat[,11] + fulldat[,14])/2
+nga <- (fulldat[,25] + fulldat[,8])/2
+usa <- (0.777*fulldat[,4] + 0.132*fulldat[,2] + 0.053*(chn + ind + fulldat[,16] + fulldat[,15])/4)/(0.777+0.132+0.053)
+fulldat <-fulldat[,c(3,1,5,7,9,12,11,24,15,17,19,25,21,20,22,18,13,23,10,4,16)]
+fulldat[,3] <- chn
+fulldat[,7] <- ind
+fulldat[,12] <- nga
+fulldat[,20] <- usa
+```
+
+The fulldat dataframe now has only 21 columns. 
+
+We can now read in our response variable: the smoking data set
+```{r}
+yy <- read.delim("smoking_outcome.txt")
+```
+
+
+
+
+```{r}
+y <- yy[,2]
+
+# here we want to calculate the correlation between yy and the first 10000 loci
+# we also want to know the p-values for each of the linear regressions run
+plong <- corlong <- NULL
+
+proc.time()
+for (i in 1:10000){
+  
+  # remove loci with all minor allele frequncy 0
+  if(var(fulldat[i,])){
+    
+  # run a linear regression using the smoking data as the response and the i'th row of fulldat as the predictor
+  fit <- lm(y~fulldat[i,]) 
+  
+  # find the correlation between the response variable and the i'th row of fulldat
+  # (This is why they needed to be of the same dimension! 21 elements long)
+  corlong[i] <- cor(fulldat[i,], y)
+  
+  #output slope from linear regression
+  plong[i] <- summary(fit)$coef[2,4] 
+  }
+}
+proc.time()
+```
+
+This process took 2.54 seconds to finish, so if we assume that processing 10,000 records takes 2.54 seconds, then processing 1,099,146 samples would take 279.18 seconds, or about **4.65 minutes**. 
+
+\n
+We can now try to rewrite the above code without using a for loop so that we can improve the runtime of the algorithm. 
+```{r}
+# n is the sample size
+n <- dim(yy)[1]  
+
+# initialize a variable to store p values.
+pvalue <- matrix(0, length(chr), 1) 
+
+# initialize a variable to store correlation.
+corvalue <- matrix(0, length(chr), 1) 
+
+colnames(pvalue) <- c("prevave") 
+colnames(corvalue) <- c("prevave")
+```
+
+
+And we can now run the vector operation to obtain the same information, but without using a for-loop. Let's see how much more quickly this process runs compared with the above process. 
+```{r}
+proc.time()
+temp <- scale(t(fulldat))
+y1 <- y/sqrt(var(y))
+
+asd <- y1%*%temp/(n-1) # obtain correlation using apply 
+#asd <- suppressWarnings(apply( t(fulldat) , 2 , cor , y)) # alternative way
+
+# mid step to calculate p value
+asd1 <- 1-asd^2  
+
+# this is the T statistics
+asd2 <- sqrt(n-2)*asd/sqrt(asd1) 
+
+# transform T statistics to p-value
+pvalue[,1] <- 2*(1-pt(abs(asd2),(n-2))) 
+
+# pass correlation to corvalue.
+corvalue[,1] <- asd 
+proc.time()
+```
+
+Only 3.351 seconds instead of an estimated 4.65 minutes! Pretty great. We want to double check that we got the same correlations and p-values using the same two methods: 
+
+```{r}
+abs(sum(plong-pvalue[1:10000], na.rm=T))
+abs(sum(corlong-corvalue[1:10000], na.rm=T))
+```
+
+And indeed we see that these two values are essentially zero, meaning that we were able to obtain the same correlations and p-values. 
+
+
+\n 
+We now want to generate a manhattan plot so we can visualize our data. In order to do this, we need to have a dataframe that has 4 columns with the following names: 
+1. CHR
+2. BP
+3. SNP
+4. P
+These columns allows the plotting function to create the manhattan plot. 
+
+```{r}
+mu = colMeans(pvalue)
+print(mu)
+```
+
+We can see from the above value of mu that there are NULL values in the p-values vector. We need to fill those null values using a method such as forward filling or mean value replacement. 
+
+```{r}
+# pvalue[is.na(pvalue[,1]), 1] <- mean(pvalue[,1], na.rm = TRUE)
+# sum(is.na(pvalue))
+```
+
+We can see from the 'mu_new' variable that we have successfully removed all of the NULL values from the columns. Let's continue. 
+```{r}
+# mu_new = colMeans(pvalue)
+# print(mu_new)
+```
+
+## Question 1
+Create a manhattan chart showing the resulting p-values and the 'chr' vector, and the 'locaiton' vector presented in the lab1.RData file: 
+```{r}
+# create dataframe with thefollwong chracteristics 
+df1 <- data.frame(chr, pvalue, location)
+
+# Make the Manhattan plot on the gwasResults dataset
+manhattan(df1, chr="chr", bp="location", p="prevave",snp="location", col = c("gray10", "gray60"))
+```
+
+## Question 2
+Identify top 9 locations on chromosome 21 based on the association p-values.
+
+\n 
+In order to answer this question we can take our newly created dataframe **df1** and sort it by p-value. Then we can take the top 9 rows and store the locations of those rows and use them to perform the online lookups to find the 'rs' number for the top 9 locations. 
+
+```{r}
+df1[order(df1$prevave, decreasing=TRUE), ]
+```
+
+This is the result of looking up each of the top 9 p-values on https://www.ncbi.nlm.nih.gov
+
+| Chromosome | p-value   | location | rs-number   |
+|------------|-----------|----------|-------------|
+| 21         | 0.9999864 | 27207117 | rs1580939   |
+| 21         | 0.9999827 | 28712646 | rs9974655   |
+| 21         | 0.9999793 | 44391110 | rs543093292 |
+| 21         | 0.9999768 | 28892099 | rs28892099  |
+| 21         | 0.9999670 | 21877114 | rs2212669   |
+| 21         | 0.9999581 | 9499277  | rs561023278 |
+| 21         | 0.9999581 | 16963839 | rs562942653 |
+| 21         | 0.9999581 | 18461881 | rs557466620 |
+| 21         | 0.9999581 | 23814186 | rs184788684 |
+
+I note here that after the first 5 largest p-values, the next largest p-value has several repeated values. This means that, with no other relatively unique column to sort on, these values with constant p-value are unordered. It's then likely that the 4 rows in which the p-value is 0.9999581 might be different than rows for other students. Should I group the data frame by p-value and repeat this procedure, taking for example the max index number in each group? Then I would get only a single location for each p-value. 
+
+
+## Question 3
+
+
+
+
+
