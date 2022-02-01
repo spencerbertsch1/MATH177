@@ -1,0 +1,114 @@
+---
+title: "Lab 4 - QBS 177"
+output: html_notebook
+---
+
+Spencer Bertsch  
+Jan. 2022
+
+------------
+
+Some helpful commands:  
+* Insert a new code chunk: *Cmd+Option+I*  
+* Run a code cell: *Cmd+Shift+Enter*  
+* Preview the notebook HTML file: *Cmd+Shift+K*  
+
+
+
+### Imports 
+```{r}
+library(glue)
+library(qqman)
+```
+
+First we need to change our current working directory to the correct directory for Assignment 3
+```{r}
+setwd('/Users/spencerbertsch/Desktop/dev/phd_courses/MATH177/lab4')
+getwd()
+```
+
+### Import the raw data that was generated from the previous lab 
+```{r}
+load('lab1.Rdata')
+```
+
+We new have a mismatch between the number of response variables and samples, so we can restructure the data to make each one equal to 21.  
+```{r}
+chn <- (fulldat[,5] + fulldat[,6])/2
+ind <- (fulldat[,11] + fulldat[,14])/2
+nga <- (fulldat[,25] + fulldat[,8])/2
+usa <- (0.777*fulldat[,4] + 0.132*fulldat[,2] + 0.053*(chn + ind + fulldat[,16] + fulldat[,15])/4)/(0.777+0.132+0.053)
+fulldat <-fulldat[,c(3,1,5,7,9,12,11,24,15,17,19,25,21,20,22,18,13,23,10,4,16)]
+fulldat[,3] <- chn
+fulldat[,7] <- ind
+fulldat[,12] <- nga
+fulldat[,20] <- usa
+```
+
+We can now read in the smoking data:
+```{r}
+yy <- read.delim("smoking_outcome.txt")
+```
+
+
+Here we can explicitly obtain the vector that represents our response variable: the prevelance of smoking in 21 different countries. 
+```{r}
+y <- yy[,2]
+```
+
+
+
+
+```{r}
+plong <- corlong <- NULL
+
+date()
+for (i in 1:10000){
+  if(var(fulldat[i,])){   # remove loci with all minor allele frequency 0
+    
+    # Step 1: We find the correlation between the i'th sample's data and our response variable 
+    corlong[i] <- cor(fulldat[i,], y)
+    
+    # Step 2: Run a linear regression using only the i'th sample's data as predictors
+    fit <- lm(y~fulldat[i,]) 
+    
+    #Step 3: We output slope from linear regression model 
+    plong[i] <- summary(fit)$coef[2,4] 
+  }
+}
+date()
+```
+
+This process took 2 seconds to finish, so if we assume that processing 10,000 records takes 2 seconds, then processing 1,099,146 samples would take 219.8 seconds, or about 3.5 minutes. 
+
+\n
+We can now try to rewrite the above code without using a for loop so that we can improve the runtime of the algorithm. 
+```{r}
+n <- 21
+# We can now obtain the correlation between the futtdat matrix and the response variable: 
+# first we scale the fulldat matrix
+temp <- scale(t(fulldat))
+
+y1 <- y/sqrt(var(y))
+
+asd <- y1 %*% temp/(n-1)
+
+```
+
+
+```{r}
+fulldat[2, ]
+```
+
+
+We know we have only 21 samples, so $n$ in these calculations is simply 21. 
+
+After we get a t vector, we can use the p-t function to obtain the p-value: 
+pt()
+
+
+```{r}
+manhattan(plong)
+```
+
+
