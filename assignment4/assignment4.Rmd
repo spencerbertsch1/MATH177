@@ -216,7 +216,7 @@ Use par(mfrow=c(3,3)) to plot all 9 figures in one plot
 yy
 ```
 
-Now we need to get the minor allele frequencies for each of the top 9 records seen in question 2. How do index the correct minor allele frequencies out of the fulldat matrix? 
+Now we need to get the minor allele frequencies for each of the top 9 records seen in question 2. **How do index the correct minor allele frequencies out of the fulldat matrix?** We only have the location... how do we find the correct row in fulldat using that information? We could save the highest p-values into an array and re-run the loop that runs all the regressions and perform a check. If we run into a p-value in the array then we save the index of the row and the row values so we can use them later on in Question 3. I feel like that's not the best way to go about it... 
 
 ```{r}
 top_p_value_df
@@ -224,7 +224,118 @@ top_p_value_df
 
 
 ```{r}
-fulldat
+# visualize loci 5 in fulldat
+fulldat[5,]
 ```
 
+
+Although we don't know the loci that correspond to the correct locations seens in question 2, we can still write the plotting code. 
+
+Let's assume that the correct loci are: 2, 3, 4, 5, 6, 7, 8, 9, 10
+```{r}
+# we can prepare our data here: 
+response <- yy[, 2]
+
+maf_loci1 <- fulldat[2,]
+maf_loci2 <- fulldat[3,]
+maf_loci3 <- fulldat[4,]
+maf_loci4 <- fulldat[4,]
+maf_loci5 <- fulldat[5,]
+maf_loci6 <- fulldat[6,]
+maf_loci7 <- fulldat[7,]
+maf_loci8 <- fulldat[8,]
+maf_loci9 <- fulldat[9,]
+```
+
+
+Now that we have our predictors and response variables defined, we can create the matrix of scatter plots: 
+```{r}
+par(mfrow = c(3, 3))  
+
+# 1st plot
+plot(maf_loci1, response, pch=16, col='red', cex=1.2, main='First plot')                        
+abline(lm(response ~ maf_loci1), col='blue')
+c1 <- round(cor(maf_loci1, response, method = "pearson"), 3)
+legend(0.009, 25, legend=c(c1), 
+       fill = c("blue","red")
+)
+
+# 2nd plot
+plot(maf_loci2, response, pch=16, col='red', cex=1.2, main='Second plot')                        
+abline(lm(response ~ maf_loci2), col='blue')
+c1 <- round(cor(maf_loci2, response, method = "pearson"), 3)
+legend(0.009, 25, legend=c(c1), 
+       fill = c("blue","red")
+)
+
+# 3rd plot
+plot(maf_loci3, response, pch=16, col='red', cex=1.2, main='Third plot')                        
+abline(lm(response ~ maf_loci3), col='blue')
+c1 <- round(cor(maf_loci3, response, method = "pearson"), 3)
+legend(0.009, 25, legend=c(c1), 
+       fill = c("blue","red")
+)
+
+# 4th plot
+plot(maf_loci4, response, pch=16, col='red', cex=1.2, main='Fourth plot')                        
+abline(lm(response ~ maf_loci4), col='blue')
+c1 <- round(cor(maf_loci4, response, method = "pearson"), 3)
+legend(0.009, 25, legend=c(c1), 
+       fill = c("blue","red")
+)
+
+# 5th plot
+plot(maf_loci5, response, pch=16, col='red', cex=1.2, main='Fifth plot')                        
+abline(lm(response ~ maf_loci5), col='blue')
+c1 <- round(cor(maf_loci5, response, method = "pearson"), 3)
+legend(0.009, 25, legend=c(c1), 
+       fill = c("blue","red")
+)
+
+# 6th plot
+plot(maf_loci6, response, pch=16, col='red', cex=1.2, main='Sixth plot')                        
+abline(lm(response ~ maf_loci6), col='blue')
+c1 <- round(cor(maf_loci6, response, method = "pearson"), 3)
+legend(0.009, 25, legend=c(c1), 
+       fill = c("blue","red")
+)
+
+# 7th plot
+plot(maf_loci7, response, pch=16, col='red', cex=1.2, main='Seventh plot')                        
+abline(lm(response ~ maf_loci7), col='blue')
+c1 <- round(cor(maf_loci7, response, method = "pearson"), 3)
+legend(0.009, 25, legend=c(c1), 
+       fill = c("blue","red")
+)
+
+# 8th plot
+plot(maf_loci8, response, pch=16, col='red', cex=1.2, main='Eighth plot')                        
+abline(lm(response ~ maf_loci8), col='blue')
+c1 <- round(cor(maf_loci8, response, method = "pearson"), 3)
+legend(0.009, 25, legend=c(c1), 
+       fill = c("blue","red")
+)
+
+# 9th plot
+plot(maf_loci9, response, pch=16, col='red', cex=1.2, main='Nineth plot')                        
+abline(lm(response ~ maf_loci9), col='blue')
+c1 <- round(cor(maf_loci9, response, method = "pearson"), 3)
+legend(0.009, 25, legend=c(c1), 
+       fill = c("blue","red")
+)
+```
+
+```{r}
+layout_matrix <- matrix(c(1, 2, 3, 4, 5, 6, 7, 8, 9), ncol = 3, nrow = 3)  # Define position matrix
+layout(layout_matrix, widths = 1:1, heights = 2:1) 
+plot(1:10, main = "Plot No. 1")                           # One plot for each layout position
+plot(1:10, main = "Plot No. 2")
+plot(1:10, main = "Plot No. 3")
+plot(1:10, main = "Plot No. 4")
+plot(1:10, main = "Plot No. 1")                           # One plot for each layout position
+plot(1:10, main = "Plot No. 2")
+plot(1:10, main = "Plot No. 3")
+plot(1:10, main = "Plot No. 4")
+plot(1:10, main = "Plot No. 1")                           # One plot for each layout position
+```
 
