@@ -144,33 +144,38 @@ We now want to generate a manhattan plot so we can visualize our data. In order 
 3. SNP
 4. P
 These columns allows the plotting function to create the manhattan plot. 
-
+In order to make our Manhattan plot below, we need to create a data frame with the charactersitics mentioned above: 
 ```{r}
-mu = colMeans(pvalue)
-print(mu)
+# create dataframe with thefollwong chracteristics 
+df1 <- data.frame(chr, pvalue, location)
 ```
 
-We can see from the above value of mu that there are NULL values in the p-values vector. We need to fill those null values using a method such as forward filling or mean value replacement. 
 
+We can use the below code to fill the NA values in the p-value vector in order to fix the bug in the plot 
 ```{r}
 # pvalue[is.na(pvalue[,1]), 1] <- mean(pvalue[,1], na.rm = TRUE)
 # sum(is.na(pvalue))
 ```
-
-We can see from the 'mu_new' variable that we have successfully removed all of the NULL values from the columns. Let's continue. 
 ```{r}
 # mu_new = colMeans(pvalue)
 # print(mu_new)
+# df1 <- data.frame(chr, pvalue, location)
 ```
+
+Another option here instead of filling the p-values with the mean p-value is to simply drop the rows that have NAs in the position of p-values. It's probably not a best practice to fill NAs for the results of statistical tests, so better to throw out the records that are missing the results so we can ignore them. 
+```{r}
+print('We can find out how many NAs there are in our p-values:')
+dim(df1)[1] - dim(df1[!is.na(df1$prevave),])[1]
+df2 <- df1[!is.na(df1$prevave),]
+```
+
+
 
 ## Question 1
 Create a manhattan chart showing the resulting p-values and the 'chr' vector, and the 'locaiton' vector presented in the lab1.RData file: 
 ```{r}
-# create dataframe with thefollwong chracteristics 
-df1 <- data.frame(chr, pvalue, location)
-
 # Make the Manhattan plot on the gwasResults dataset
-manhattan(df1, chr="chr", bp="location", p="prevave",snp="location", col = c("gray10", "gray60"))
+manhattan(df2, chr="chr", bp="location", p="prevave", snp="location", col = c("gray10", "gray60"))
 ```
 
 ## Question 2
@@ -180,7 +185,8 @@ Identify top 9 locations on chromosome 21 based on the association p-values.
 In order to answer this question we can take our newly created dataframe **df1** and sort it by p-value. Then we can take the top 9 rows and store the locations of those rows and use them to perform the online lookups to find the 'rs' number for the top 9 locations. 
 
 ```{r}
-df1[order(df1$prevave, decreasing=TRUE), ]
+top_p_value_df <- df1[order(df1$prevave, decreasing=TRUE), ]
+top_p_value_df
 ```
 
 This is the result of looking up each of the top 9 p-values on https://www.ncbi.nlm.nih.gov
@@ -201,8 +207,24 @@ I note here that after the first 5 largest p-values, the next largest p-value ha
 
 
 ## Question 3
+Draw scatter plot between smoking prevalence (y) and minor allele frequencies of each loci’s in 2. Add a regression line to the scatter plot. Add the correlation value to the plots as a legend. 
+
+Use par(mfrow=c(3,3)) to plot all 9 figures in one plot
+
+```{r}
+# we have the response variable y:
+yy
+```
+
+Now we need to get the minor allele frequencies for each of the top 9 records seen in question 2. How do index the correct minor allele frequencies out of the fulldat matrix? 
+
+```{r}
+top_p_value_df
+```
 
 
-
+```{r}
+fulldat
+```
 
 
