@@ -147,7 +147,8 @@ These columns allows the plotting function to create the manhattan plot.
 In order to make our Manhattan plot below, we need to create a data frame with the charactersitics mentioned above: 
 ```{r}
 # create dataframe with thefollwong chracteristics 
-df1 <- data.frame(chr, pvalue, location)
+index <- c(1:dim(pvalue)[1])
+df1 <- data.frame(index, chr, pvalue, location)
 ```
 
 
@@ -155,12 +156,11 @@ We can use the below code to fill the NA values in the p-value vector in order t
 ```{r}
 # pvalue[is.na(pvalue[,1]), 1] <- mean(pvalue[,1], na.rm = TRUE)
 # sum(is.na(pvalue))
-```
-```{r}
 # mu_new = colMeans(pvalue)
 # print(mu_new)
 # df1 <- data.frame(chr, pvalue, location)
 ```
+
 
 Another option here instead of filling the p-values with the mean p-value is to simply drop the rows that have NAs in the position of p-values. It's probably not a best practice to fill NAs for the results of statistical tests, so better to throw out the records that are missing the results so we can ignore them. 
 ```{r}
@@ -184,10 +184,13 @@ Identify top 9 locations on chromosome 21 based on the association p-values.
 \n 
 In order to answer this question we can take our newly created dataframe **df1** and sort it by p-value. Then we can take the top 9 rows and store the locations of those rows and use them to perform the online lookups to find the 'rs' number for the top 9 locations. 
 
+# Should this be decreasing FALSE or decreasing TRUE? I think we want the best fits, so we would want to smallest p-values, so we should use decreasing = FALSE
+
 ```{r}
-top_p_value_df <- df1[order(df1$prevave, decreasing=TRUE), ]
+top_p_value_df <- df1[order(df1$prevave, decreasing=FALSE), ]
 top_p_value_df
 ```
+# RECALCULATE THIS SECTION!!! 
 
 This is the result of looking up each of the top 9 p-values on https://www.ncbi.nlm.nih.gov
 
@@ -216,35 +219,29 @@ Use par(mfrow=c(3,3)) to plot all 9 figures in one plot
 yy
 ```
 
-Now we need to get the minor allele frequencies for each of the top 9 records seen in question 2. **How do index the correct minor allele frequencies out of the fulldat matrix?** We only have the location... how do we find the correct row in fulldat using that information? We could save the highest p-values into an array and re-run the loop that runs all the regressions and perform a check. If we run into a p-value in the array then we save the index of the row and the row values so we can use them later on in Question 3. I feel like that's not the best way to go about it... 
+Now we need to get the minor allele frequencies for each of the top 9 records seen in question 2. We can do this by adding an index column into the dataframe and using that to index the correct rows out of the initial fulldat matrix. 
 
 ```{r}
-top_p_value_df
+top_indices <- top_p_value_df[1:9, ]$index
+print('These are the rows in the fulldat dataframe we want to plot against the response variable:')
+top_indices
 ```
 
 
-```{r}
-# visualize loci 5 in fulldat
-fulldat[5,]
-```
-
-
-Although we don't know the loci that correspond to the correct locations seens in question 2, we can still write the plotting code. 
-
-Let's assume that the correct loci are: 2, 3, 4, 5, 6, 7, 8, 9, 10
+And finally we can get the correct rows out of the fulldat matrix that correspond to all of the p-values obtained from the processing above: 
 ```{r}
 # we can prepare our data here: 
 response <- yy[, 2]
 
-maf_loci1 <- fulldat[2,]
-maf_loci2 <- fulldat[3,]
-maf_loci3 <- fulldat[4,]
-maf_loci4 <- fulldat[4,]
-maf_loci5 <- fulldat[5,]
-maf_loci6 <- fulldat[6,]
-maf_loci7 <- fulldat[7,]
-maf_loci8 <- fulldat[8,]
-maf_loci9 <- fulldat[9,]
+maf_loci1 <- fulldat[top_indices[1],]
+maf_loci2 <- fulldat[top_indices[2],]
+maf_loci3 <- fulldat[top_indices[3],]
+maf_loci4 <- fulldat[top_indices[4],]
+maf_loci5 <- fulldat[top_indices[5],]
+maf_loci6 <- fulldat[top_indices[6],]
+maf_loci7 <- fulldat[top_indices[7],]
+maf_loci8 <- fulldat[top_indices[8],]
+maf_loci9 <- fulldat[top_indices[9],]
 ```
 
 
@@ -256,7 +253,7 @@ par(mfrow = c(3, 3))
 plot(maf_loci1, response, pch=16, col='red', cex=1.2, main='First plot')                        
 abline(lm(response ~ maf_loci1), col='blue')
 c1 <- round(cor(maf_loci1, response, method = "pearson"), 3)
-legend(0.009, 25, legend=c(c1), 
+legend(0.3, 25, legend=c(c1), 
        fill = c("blue","red")
 )
 
@@ -325,17 +322,10 @@ legend(0.009, 25, legend=c(c1),
 )
 ```
 
-```{r}
-layout_matrix <- matrix(c(1, 2, 3, 4, 5, 6, 7, 8, 9), ncol = 3, nrow = 3)  # Define position matrix
-layout(layout_matrix, widths = 1:1, heights = 2:1) 
-plot(1:10, main = "Plot No. 1")                           # One plot for each layout position
-plot(1:10, main = "Plot No. 2")
-plot(1:10, main = "Plot No. 3")
-plot(1:10, main = "Plot No. 4")
-plot(1:10, main = "Plot No. 1")                           # One plot for each layout position
-plot(1:10, main = "Plot No. 2")
-plot(1:10, main = "Plot No. 3")
-plot(1:10, main = "Plot No. 4")
-plot(1:10, main = "Plot No. 1")                           # One plot for each layout position
-```
+
+
+
+
+
+
 
