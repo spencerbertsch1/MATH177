@@ -14,9 +14,6 @@ Some helpful commands:
 * Preview the notebook HTML file: *Cmd+Shift+K*  
 
 
-
-
-
 ### Imports 
 ```{r}
 library(glue)
@@ -48,13 +45,12 @@ fulldat[,12] <- nga
 fulldat[,20] <- usa
 ```
 
-The fulldat dataframe now has only 21 columns. 
+The fulldat data frame now has only 21 columns. 
 
 We can now read in our response variable: the smoking data set
 ```{r}
 yy <- read.delim("smoking_outcome.txt")
 ```
-
 
 
 
@@ -184,36 +180,36 @@ Identify top 9 locations on chromosome 21 based on the association p-values.
 \n 
 In order to answer this question we can take our newly created dataframe **df1** and sort it by p-value. Then we can take the top 9 rows and store the locations of those rows and use them to perform the online lookups to find the 'rs' number for the top 9 locations. 
 
-# Should this be decreasing FALSE or decreasing TRUE? I think we want the best fits, so we would want to smallest p-values, so we should use decreasing = FALSE
+\n 
+By "top locations' here we mean the smallest p-values. If the model does a good job of fitting the data, then the p-value for the fit will be quite small. If there is no reasonable fit, then the p-value will be larger (closer to 1). We can then add an index column to our data and sort it by p-value in order to get the locations that correspond to the smallest 9 p-values. 
 
 ```{r}
 top_p_value_df <- df1[order(df1$prevave, decreasing=FALSE), ]
 top_p_value_df
 ```
-# RECALCULATE THIS SECTION!!! 
 
 This is the result of looking up each of the top 9 p-values on https://www.ncbi.nlm.nih.gov
 
-| Chromosome | p-value   | location | rs-number   |
-|------------|-----------|----------|-------------|
-| 21         | 0.9999864 | 27207117 | rs1580939   |
-| 21         | 0.9999827 | 28712646 | rs9974655   |
-| 21         | 0.9999793 | 44391110 | rs543093292 |
-| 21         | 0.9999768 | 28892099 | rs28892099  |
-| 21         | 0.9999670 | 21877114 | rs2212669   |
-| 21         | 0.9999581 | 9499277  | rs561023278 |
-| 21         | 0.9999581 | 16963839 | rs562942653 |
-| 21         | 0.9999581 | 18461881 | rs557466620 |
-| 21         | 0.9999581 | 23814186 | rs184788684 |
+| Chromosome |   p-value    | location | rs-number   |
+|------------|--------------|----------|-------------|
+| 21         | 1.557500e-07 | 18887601 | rs7279313   |
+| 21         | 5.341077e-07 | 18887201 | rs8129365   |
+| 21         | 6.498068e-07 | 18887483 | rs8129817   |
+| 21         | 7.643547e-07 | 18892725 | rs59660381  |
+| 21         | 2.356621e-06	| 21460976 | rs78892776  |
+| 21         | 2.356621e-06 | 21460979 | rs79009469  |
+| 21         | 2.963624e-06 | 21458577 | rs78552707  |
+| 21         | 3.099801e-06 | 21458112 | rs77095203  |
+| 21         | 3.312984e-06	| 39016910 | rs1787423   |
 
-I note here that after the first 5 largest p-values, the next largest p-value has several repeated values. This means that, with no other relatively unique column to sort on, these values with constant p-value are unordered. It's then likely that the 4 rows in which the p-value is 0.9999581 might be different than rows for other students. Should I group the data frame by p-value and repeat this procedure, taking for example the max index number in each group? Then I would get only a single location for each p-value. 
+These rs-numbers are the results of lookups for the locaitons that correspond with the smallest 9 p-values found above. 
 
 
 ## Question 3
-Draw scatter plot between smoking prevalence (y) and minor allele frequencies of each loci’s in 2. Add a regression line to the scatter plot. Add the correlation value to the plots as a legend. 
+Draw scatter plot between smoking prevalence (y) and minor allele frequencies of each loci’s in 2. Add a regression line to the scatter plot. Add the correlation value to the plots as a legend. Use par(mfrow=c(3,3)) to plot all 9 figures in one plot. 
 
-Use par(mfrow=c(3,3)) to plot all 9 figures in one plot
-
+\n
+We can examine our response variable here: 
 ```{r}
 # we have the response variable y:
 yy
@@ -253,7 +249,7 @@ par(mfrow = c(3, 3))
 plot(maf_loci1, response, pch=16, col='red', cex=1.2, main='First plot')                        
 abline(lm(response ~ maf_loci1), col='blue')
 c1 <- round(cor(maf_loci1, response, method = "pearson"), 3)
-legend(0.3, 25, legend=c(c1), 
+legend(0.12, 25, legend=c(c1), 
        fill = c("blue","red")
 )
 
@@ -261,7 +257,7 @@ legend(0.3, 25, legend=c(c1),
 plot(maf_loci2, response, pch=16, col='red', cex=1.2, main='Second plot')                        
 abline(lm(response ~ maf_loci2), col='blue')
 c1 <- round(cor(maf_loci2, response, method = "pearson"), 3)
-legend(0.009, 25, legend=c(c1), 
+legend(0.125, 25, legend=c(c1), 
        fill = c("blue","red")
 )
 
@@ -269,7 +265,7 @@ legend(0.009, 25, legend=c(c1),
 plot(maf_loci3, response, pch=16, col='red', cex=1.2, main='Third plot')                        
 abline(lm(response ~ maf_loci3), col='blue')
 c1 <- round(cor(maf_loci3, response, method = "pearson"), 3)
-legend(0.009, 25, legend=c(c1), 
+legend(0.125, 25, legend=c(c1), 
        fill = c("blue","red")
 )
 
@@ -277,7 +273,7 @@ legend(0.009, 25, legend=c(c1),
 plot(maf_loci4, response, pch=16, col='red', cex=1.2, main='Fourth plot')                        
 abline(lm(response ~ maf_loci4), col='blue')
 c1 <- round(cor(maf_loci4, response, method = "pearson"), 3)
-legend(0.009, 25, legend=c(c1), 
+legend(0.125, 25, legend=c(c1), 
        fill = c("blue","red")
 )
 
@@ -285,7 +281,7 @@ legend(0.009, 25, legend=c(c1),
 plot(maf_loci5, response, pch=16, col='red', cex=1.2, main='Fifth plot')                        
 abline(lm(response ~ maf_loci5), col='blue')
 c1 <- round(cor(maf_loci5, response, method = "pearson"), 3)
-legend(0.009, 25, legend=c(c1), 
+legend(0.09, 25, legend=c(c1), 
        fill = c("blue","red")
 )
 
@@ -293,7 +289,7 @@ legend(0.009, 25, legend=c(c1),
 plot(maf_loci6, response, pch=16, col='red', cex=1.2, main='Sixth plot')                        
 abline(lm(response ~ maf_loci6), col='blue')
 c1 <- round(cor(maf_loci6, response, method = "pearson"), 3)
-legend(0.009, 25, legend=c(c1), 
+legend(0.09, 25, legend=c(c1), 
        fill = c("blue","red")
 )
 
@@ -301,7 +297,7 @@ legend(0.009, 25, legend=c(c1),
 plot(maf_loci7, response, pch=16, col='red', cex=1.2, main='Seventh plot')                        
 abline(lm(response ~ maf_loci7), col='blue')
 c1 <- round(cor(maf_loci7, response, method = "pearson"), 3)
-legend(0.009, 25, legend=c(c1), 
+legend(0.09, 25, legend=c(c1), 
        fill = c("blue","red")
 )
 
@@ -309,7 +305,7 @@ legend(0.009, 25, legend=c(c1),
 plot(maf_loci8, response, pch=16, col='red', cex=1.2, main='Eighth plot')                        
 abline(lm(response ~ maf_loci8), col='blue')
 c1 <- round(cor(maf_loci8, response, method = "pearson"), 3)
-legend(0.009, 25, legend=c(c1), 
+legend(0.09, 25, legend=c(c1), 
        fill = c("blue","red")
 )
 
@@ -317,7 +313,7 @@ legend(0.009, 25, legend=c(c1),
 plot(maf_loci9, response, pch=16, col='red', cex=1.2, main='Nineth plot')                        
 abline(lm(response ~ maf_loci9), col='blue')
 c1 <- round(cor(maf_loci9, response, method = "pearson"), 3)
-legend(0.009, 25, legend=c(c1), 
+legend(0.15, 25, legend=c(c1), 
        fill = c("blue","red")
 )
 ```
