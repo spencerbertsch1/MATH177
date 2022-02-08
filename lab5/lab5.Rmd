@@ -1,0 +1,71 @@
+---
+title: "Lab 5 - QBS 177"
+output: html_notebook
+---
+
+Spencer Bertsch  
+Jan. 2022
+
+------------
+
+Some helpful commands:  
+* Insert a new code chunk: *Cmd+Option+I*  
+* Run a code cell: *Cmd+Shift+Enter*  
+* Preview the notebook HTML file: *Cmd+Shift+K*  
+
+
+
+### Imports 
+```{r}
+library(glue)
+```
+
+First we need to change our current working directory to the correct directory for Assignment 3
+```{r}
+setwd('/Users/spencerbertsch/Desktop/dev/phd_courses/MATH177/lab5')
+getwd()
+```
+
+### Import the raw data
+```{r}
+data <- read.table("fulldat.txt", header=F)
+data[1:3,1:10]
+y <- data[,1]
+x <- data[,3:50]
+workingD <- data.frame(cbind(y,x))
+```
+We now want to randomly create the train-test split for our data set 
+```{r}
+set.seed(1)
+train <- sample(1:240,160,replace=FALSE) # randomly divide the data in to training and testing
+test <- (1:240)[-train]
+```
+
+
+Lets examine the dimensions of our new training and testing sets :
+```{r}
+length(train)
+length(test)
+```
+
+
+We now want to run a stepwise regression on our training set with 160 samples
+```{r}
+#define intercept-only model
+intercept_only <- lm(mpg ~ 1, data=mtcars)
+
+#define model with all predictors
+all <- lm(mpg ~ ., data=mtcars)
+
+#perform forward stepwise regression
+forward <- step(intercept_only, direction='forward', scope=formula(all), trace=0)
+```
+
+
+
+
+
+
+
+
+
