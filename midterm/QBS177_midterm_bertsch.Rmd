@@ -1,0 +1,91 @@
+---
+title: "Midterm - QBS 177"
+output: html_notebook
+---
+
+Spencer Bertsch  
+Feb. 2022
+
+------------
+
+Some helpful commands:  
+* Insert a new code chunk: *Cmd+Option+I*  
+* Run a code cell: *Cmd+Shift+Enter*  
+* Preview the notebook HTML file: *Cmd+Shift+K*  
+
+
+### Imports 
+```{r}
+library(glue)
+library(qqman)
+```
+
+First we need to change our current working directory to the correct directory for Assignment 3
+```{r}
+setwd('/Users/spencerbertsch/Desktop/dev/phd_courses/MATH177/midterm')
+getwd()
+```
+
+
+# Question 1
+### Import the raw data 
+Here we load the data that contains all of the SNPs so we can see which are the top five SNPs that have the strongest association based on their p-values. We learned in assignment 4 and lab 5 that the lowest p-values designate the SNPs that have the strongest assosiation with a response variable. 
+```{r}
+load('dbp.Rdata')
+```
+
+Before we can progress with question 1 (a), we need to do a few things. 
+1. We need to fill the NA values in our SNPs
+2. We need to alter the data type of our SNPs from factor variables [2, 3, 4] to numeric variables [0, 1, 2].
+
+
+```{r}
+# lets isolate the columns we need for the problem 
+snp.data = dbp[,c("affection", "sex", "age", "rs1101", "rs1102", "rs1103", "rs1104", "rs1105", "rs1106", "rs1107", "rs1108", "rs1109", "rs1110", "rs1111", "rs1112", "rs1113", "rs1114", "rs1115", "rs1116", "rs1117", "rs1118", "rs1119", "rs1120")]
+
+# convert all the SNP column to numeric and adjust them to the proper range
+for (i in 1:20){
+  snp.data[, (i+3)] <- as.numeric(snp.data[, (i+3)]) - 1
+}
+
+print('Summary after all the SNP variables were changed to numeric variables:')
+summary(snp.data)
+```
+And indeed we can see that we were successful in converting all the SNPs to numeric dtypes. 
+
+# Question: Do we need to deal with NULLs here? 
+
+Here we examine the mean values of the columns. If the mean is NULL, that means there are NULL values in the dataframe that we need to fill with a method such as forward filling or mean value replacement.
+```{r}
+mu = colMeans(snp.data[,c("rs1101", "rs1102", "rs1103", "rs1104", "rs1105", "rs1106", "rs1107", "rs1108", "rs1109", "rs1110", "rs1111", "rs1112", "rs1113", "rs1114", "rs1115", "rs1116", "rs1117", "rs1118", "rs1119", "rs1120")])
+print(mu[0:10])
+```
+And we can see that some of our SNP columns contain null values! So we can simply mean fill or forward fill these values and move on. 
+
+## TODO mean fill or forward fill the NAs
+```{r}
+# TODO fill NAs
+```
+
+
+### Question 1(a):
+Here we want to use a for loop to iterate over all of the SNPs in our data set. Here we want to iterate from the 9th column to the 28th column to capture all the SNPs. That way we will capture each of the 20 SNPs in the data set. 
+```{r}
+pvalue <- 0
+
+for (i in 1:20){
+
+  # first we need to fit the logistic regression model on the SNP, adjusting for the age and sex of the patient 
+  result.adj <- glm(affection ~ sex + age + snp.data[,(i+3)], family=binomial("logit"), data=snp.data)
+  
+  # next we grab the corresponding p-value and store it outside the loop
+  pvalue[i] <- summary(result.adj)$coef[4,4] # TODO <-- double check this p-value is right, we want the one corresponding to the SNP, correct? I think that's correct. 
+}
+
+pvalue[0:10]
+```
+
+
+
+
+
