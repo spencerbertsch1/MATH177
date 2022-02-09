@@ -152,4 +152,98 @@ Here we can see that the SNPs with the strongest association (lowest p-values) a
 9. rs1107  
 10. rs1114  
 
+### Question 1(c):
+
+Before we begin with Question 1 (c), we need to convert the numerical variable back to a (binary) factor variable so that our logistic regression model can use it as the response variable. 
+```{r}
+snp.data$affection <- as.factor(snp.data$affection)
+```
+
+We need a helper function that takes an r data frame and returns the coordinates of the smallest 10 values in the data frame in order. 
+```{r}
+
+
+
+get_indices_smallest_values <- function(matrix) {
+  # This helper function returns the [row, col] coordinates of the smallest values in the matrix in order 
+  # return type: list = [[row1, col1], [row2, col2], ..., [row10, col10]]
+
+  SNPs_1 <- 0
+  SNPs_2 <- 0
+  p_vals <- 0
+  
+  for (i in 1:10){
+  
+    # stores indexes of min value
+    min = which(matrix == min(matrix), arr.ind = TRUE)  
+    print(paste("Minimum value: ", matrix[min]))
+    print(min)
+    
+    # get the SNPs and the corresponding p-value
+    index_1 <- as.integer(min[1,1])
+    index_2 <- as.integer(min[1,2])
+    snp1 <- SNPs[index_1]
+    snp2 <- SNPs[index_2]
+    p_val <- pvalue_mat[index_1, index_2]
+  
+    # save that data outside the loop 
+    SNPs_1[i] <- snp1
+    SNPs_2[i] <- snp2
+    p_vals[i] <- p_val
+    
+    # set the two values of the old smallest value to 1 and continue 
+    
+  }
+  
+  # create a data frame out of the three lists that store the results 
+  
+  # return the data frame 
+  return(min)
+}
+```
+
+
+Here we want to find the p-values for the strongest SNP-SNP interactions in our logistic regression model, still adjusting for age and sex of the subject. 
+```{r}
+pvalue <- 0
+
+# here we can initialize an empty matrix with 400 elements, each representing a p-value for the LR models we will train below
+pvalue_mat <- setNames(data.frame(matrix(ncol = 20, nrow = 20)), SNPs)
+rownames(pvalue_mat) <- SNPs
+
+
+# in our outer for loop we iterate over the SNPs
+for (i in 1:20){
+
+  # Our inner loop also happens to iterate over the SNPs
+  for (j in 1:20){
+    
+    # first we need to fit the logistic regression model on the SNP, adjusting for the age and sex of the patient
+    result.adj <- glm(affection ~ sex + age + snp.data[,(i+3)]:snp.data[,(j+3)], family=binomial("logit"), data=snp.data)
+    
+    # next we grab the corresponding p-value and store it outside the loop
+    pvalue_mat[i,j] <- summary(result.adj)$coef[4,4] 
+  }
+}
+
+# pvalue[0:10]
+
+# p_value_df <- data.frame(SNP = SNPs, p_value = pvalue)
+# p_value_df <- p_value_df[order(p_value_df$p_value, decreasing=FALSE), ]
+# head(p_value_df, 5)
+```
+
+
+### Some test code 
+```{r}
+min <- get_indices_smallest_values(matrix=pvalue_mat)
+
+index_1 <- as.integer(min[1,1])
+index_2 <- as.integer(min[1,2])
+snp1 <- SNPs[index_1]
+snp2 <- SNPs[index_2]
+p_val <- pvalue_mat[index_1, index_2]
+```
+
+
 
