@@ -222,6 +222,7 @@ Feb. 2022</p>
 * Insert a new code chunk: <em>Cmd+Option+I</em><br />
 * Run a code cell: <em>Cmd+Shift+Enter</em><br />
 * Preview the notebook HTML file: <em>Cmd+Shift+K</em></p>
+<p><strong>OPEN QUESTIONS:</strong> 1. Do we need to fill the NAs in the SNP data for question 1? The code works just fine if we don’t fill the NAs, but maybe we should fill with the mean value like we did in the homework?</p>
 <div id="imports" class="section level3">
 <h3>Imports</h3>
 <!-- rnb-text-end -->
@@ -282,8 +283,9 @@ summary(snp.data)</code></pre>
 <p>Here we examine the mean values of the columns. If the mean is NULL, that means there are NULL values in the dataframe that we need to fill with a method such as forward filling or mean value replacement.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubXUgPSBjb2xNZWFucyhzbnAuZGF0YVssYyhcInJzMTEwMVwiLCBcInJzMTEwMlwiLCBcInJzMTEwM1wiLCBcInJzMTEwNFwiLCBcInJzMTEwNVwiLCBcInJzMTEwNlwiLCBcInJzMTEwN1wiLCBcInJzMTEwOFwiLCBcInJzMTEwOVwiLCBcInJzMTExMFwiLCBcInJzMTExMVwiLCBcInJzMTExMlwiLCBcInJzMTExM1wiLCBcInJzMTExNFwiLCBcInJzMTExNVwiLCBcInJzMTExNlwiLCBcInJzMTExN1wiLCBcInJzMTExOFwiLCBcInJzMTExOVwiLCBcInJzMTEyMFwiKV0pXG5wcmludChtdVswOjEwXSlcbmBgYCJ9 -->
-<pre class="r"><code>mu = colMeans(snp.data[,c(&quot;rs1101&quot;, &quot;rs1102&quot;, &quot;rs1103&quot;, &quot;rs1104&quot;, &quot;rs1105&quot;, &quot;rs1106&quot;, &quot;rs1107&quot;, &quot;rs1108&quot;, &quot;rs1109&quot;, &quot;rs1110&quot;, &quot;rs1111&quot;, &quot;rs1112&quot;, &quot;rs1113&quot;, &quot;rs1114&quot;, &quot;rs1115&quot;, &quot;rs1116&quot;, &quot;rs1117&quot;, &quot;rs1118&quot;, &quot;rs1119&quot;, &quot;rs1120&quot;)])
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuU05QcyA8LSBjKFwicnMxMTAxXCIsIFwicnMxMTAyXCIsIFwicnMxMTAzXCIsIFwicnMxMTA0XCIsIFwicnMxMTA1XCIsIFwicnMxMTA2XCIsIFwicnMxMTA3XCIsIFwicnMxMTA4XCIsIFwicnMxMTA5XCIsIFwicnMxMTEwXCIsIFwicnMxMTExXCIsIFwicnMxMTEyXCIsIFwicnMxMTEzXCIsIFwicnMxMTE0XCIsIFwicnMxMTE1XCIsIFwicnMxMTE2XCIsIFwicnMxMTE3XCIsIFwicnMxMTE4XCIsIFwicnMxMTE5XCIsIFwicnMxMTIwXCIpXG5tdSA9IGNvbE1lYW5zKHNucC5kYXRhWywgU05Qc10pXG5wcmludChtdVswOjEwXSlcbmBgYCJ9 -->
+<pre class="r"><code>SNPs &lt;- c(&quot;rs1101&quot;, &quot;rs1102&quot;, &quot;rs1103&quot;, &quot;rs1104&quot;, &quot;rs1105&quot;, &quot;rs1106&quot;, &quot;rs1107&quot;, &quot;rs1108&quot;, &quot;rs1109&quot;, &quot;rs1110&quot;, &quot;rs1111&quot;, &quot;rs1112&quot;, &quot;rs1113&quot;, &quot;rs1114&quot;, &quot;rs1115&quot;, &quot;rs1116&quot;, &quot;rs1117&quot;, &quot;rs1118&quot;, &quot;rs1119&quot;, &quot;rs1120&quot;)
+mu = colMeans(snp.data[, SNPs])
 print(mu[0:10])</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-output-begin eyJkYXRhIjoiICAgcnMxMTAxICAgIHJzMTEwMiAgICByczExMDMgICAgcnMxMTA0ICAgIHJzMTEwNSAgICByczExMDYgICAgcnMxMTA3ICAgIHJzMTEwOCAgICByczExMDkgICAgcnMxMTEwIFxuMS4wOTgzMzMzIDAuNTI4MzMzMyAwLjkzNTAwMDAgICAgICAgIE5BIDEuMDg4MzMzMyAgICAgICAgTkEgMC4zMDUwMDAwIDAuOTYwMDAwMCAxLjExNTAwMDAgMS4wODgzMzMzIFxuIn0= -->
@@ -325,14 +327,110 @@ pvalue[0:10]</code></pre>
 <pre><code> [1] 0.89303925 0.96706492 0.46577256 0.05717227 0.80777910 0.73015069 0.17782240 0.29268567 0.74759244
 [10] 0.53943123</code></pre>
 <!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucF92YWx1ZV9kZiA8LSBkYXRhLmZyYW1lKFNOUCA9IFNOUHMsIHBfdmFsdWUgPSBwdmFsdWUpXG5wX3ZhbHVlX2RmIDwtIHBfdmFsdWVfZGZbb3JkZXIocF92YWx1ZV9kZiRwX3ZhbHVlLCBkZWNyZWFzaW5nPUZBTFNFKSwgXVxuaGVhZChwX3ZhbHVlX2RmLCA1KVxuYGBgIn0= -->
+<pre class="r"><code>p_value_df &lt;- data.frame(SNP = SNPs, p_value = pvalue)
+p_value_df &lt;- p_value_df[order(p_value_df$p_value, decreasing=FALSE), ]
+head(p_value_df, 5)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6NSwibmNvbCI6Miwic3VtbWFyeSI6W119LCJyZGYiOiJINHNJQUFBQUFBQUFBd3R5aVREbWl1QmlZR0JnWm1CaFpHSmdaZ1V5R1ZoRFE5eDBMUmdZV0ppQUhFWUdGZ1pPRUYwQlZDUU1aSUFFQlVDcW9CSnNSY1dHaG9aR0tEeFRGSjQ1Q3M4U2hXY01aUEdCVExPTFdyZG9ya09iaXQwQnJwOSs3eS9aMkoxY0h6cFRWR3VUdlhibzFxd3I3ZXZzZFg5K2k1T2Y0NHptTE5hOHhOelVZcWlUbUtDQ3pNRitBVkFtZTBGOFdXSk9hU3FhTnM2aS9ISTltRlplc0c4WUdIaUFtQitJQllGWUdDS09hbGR5VG1JeHpDNllJRmRLWWttaVhsb1IwQ3dnN3grYUZ2YjhncExNL0R5Z0ppWmhxQzNJbWhtTDBBVDRTL05BcmtyUlRjNG96Y3ZXTlFSWkFKYUdZRjRvellyRVpvSll5ZlFmUFY1Uzg5SXo4MUpoYnM5SlRFck5nWEw0Z0w0SGUxNnZvQ2d6cndUbUU2Qm9zVjVKZmtraVRCMVhjbjRPVEFUc040Wi9BRWdkYmtveUFnQUEifQ== -->
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["SNP"],"name":[1],"type":["chr"],"align":["left"]},{"label":["p_value"],"name":[2],"type":["dbl"],"align":["right"]}],"data":[{"1":"rs1112","2":"2.484971e-08","_rn_":"12"},{"1":"rs1115","2":"1.912459e-06","_rn_":"15"},{"1":"rs1117","2":"3.061879e-06","_rn_":"17"},{"1":"rs1119","2":"2.085480e-04","_rn_":"19"},{"1":"rs1113","2":"2.287019e-04","_rn_":"13"}],"options":{"columns":{"min":{},"max":[10],"total":[2]},"rows":{"min":[10],"max":[10],"total":[5]},"pages":{}}}
+  </script>
+</div>
+<!-- rnb-frame-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
+<div id="a-answer" class="section level4">
+<h4>1 (a) answer:</h4>
+<p>Here we can see that the SNPs with the strongest association (lowest p-values) are:<br />
+1. rs1112<br />
+2. rs1115<br />
+3. rs1117<br />
+4. rs1119<br />
+5. rs1113</p>
+</div>
+</div>
+<div id="question-1b" class="section level3">
+<h3>Question 1(b):</h3>
+<p>Now that we trained our logistic regression model and got the associated p-values, we need to train a linear regression model and get the p-values there as well.</p>
+<p>Let’s fill the NAs here: (OPTIONAL - do we need to fill the NAs??)</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZm9yIChpIGluIDE6MjApe1xuICBzbnAuZGF0YVtpcy5uYShzbnAuZGF0YVssKGkrMyldKSwgKGkrMyldIDwtIHJvdW5kKG1lYW4oc25wLmRhdGFbLChpKzMpXSwgbmEucm0gPSBUUlVFKSlcbn1cbnN1bShpcy5uYShzbnAuZGF0YSkpXG5gYGAifQ== -->
+<pre class="r"><code>for (i in 1:20){
+  snp.data[is.na(snp.data[,(i+3)]), (i+3)] &lt;- round(mean(snp.data[,(i+3)], na.rm = TRUE))
+}
+sum(is.na(snp.data))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDBcbiJ9 -->
+<pre><code>[1] 0</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Now that we’ve filled the NAs with the mean from each SNP, we can train our linear regression models and find the associations between each SNP and the afection, adjusting for age and sex.</p>
+<p>Let’s also change the response variable from a factor to a numeric response! We need to do this for our linear regression model which predicts a continuous variable - not a factor variable.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc25wLmRhdGEkYWZmZWN0aW9uIDwtIGFzLm51bWVyaWMoc25wLmRhdGEkYWZmZWN0aW9uKVxuYGBgIn0= -->
+<pre class="r"><code>snp.data$affection &lt;- as.numeric(snp.data$affection)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucHZhbHVlIDwtIDBcblxuZm9yIChpIGluIDE6MjApe1xuXG4gICMgZmlyc3Qgd2UgbmVlZCB0byBmaXQgdGhlIGxpbmVhciByZWdyZXNzaW9uIG1vZGVsIG9uIHRoZSBTTlAsIGFkanVzdGluZyBmb3IgdGhlIGFnZSBhbmQgc2V4IG9mIHRoZSBwYXRpZW50XG4gIGZpdCA8LSBsbShhZmZlY3Rpb24gfiBzZXggKyBhZ2UgKyBzbnAuZGF0YVssKGkrMyldLCBkYXRhPXNucC5kYXRhKVxuICBcbiAgIyBuZXh0IHdlIGdyYWIgdGhlIGNvcnJlc3BvbmRpbmcgcC12YWx1ZSBhbmQgc3RvcmUgaXQgb3V0c2lkZSB0aGUgbG9vcFxuICBwdmFsdWVbaV0gPC0gc3VtbWFyeShmaXQpJGNvZWZbNCw0XVxufVxuXG5wdmFsdWVbMDoxMF1cbmBgYCJ9 -->
+<pre class="r"><code>pvalue &lt;- 0
+
+for (i in 1:20){
+
+  # first we need to fit the linear regression model on the SNP, adjusting for the age and sex of the patient
+  fit &lt;- lm(affection ~ sex + age + snp.data[,(i+3)], data=snp.data)
+  
+  # next we grab the corresponding p-value and store it outside the loop
+  pvalue[i] &lt;- summary(fit)$coef[4,4]
+}
+
+pvalue[0:10]</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiIFsxXSAwLjk4NjYwMzc4IDAuOTY3NDc0MTcgMC42NTE1MTUxNCAwLjA2MTk4NDE1IDAuODA4NzE2MTAgMC43MzUwNTY1NSAwLjE3ODY2NDU4IDAuMjkzODk4NTggMC43NDgzMTI5NlxuWzEwXSAwLjU0MDUzMDQwXG4ifQ== -->
+<pre><code> [1] 0.98660378 0.96747417 0.65151514 0.06198415 0.80871610 0.73505655 0.17866458 0.29389858 0.74831296
+[10] 0.54053040</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucF92YWx1ZV9kZiA8LSBkYXRhLmZyYW1lKFNOUCA9IFNOUHMsIHBfdmFsdWUgPSBwdmFsdWUpXG5wX3ZhbHVlX2RmIDwtIHBfdmFsdWVfZGZbb3JkZXIocF92YWx1ZV9kZiRwX3ZhbHVlLCBkZWNyZWFzaW5nPUZBTFNFKSwgXVxuaGVhZChwX3ZhbHVlX2RmLCAxMClcbmBgYCJ9 -->
+<pre class="r"><code>p_value_df &lt;- data.frame(SNP = SNPs, p_value = pvalue)
+p_value_df &lt;- p_value_df[order(p_value_df$p_value, decreasing=FALSE), ]
+head(p_value_df, 10)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-frame-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImRhdGEuZnJhbWUiXSwibnJvdyI6MTAsIm5jb2wiOjIsInN1bW1hcnkiOltdfSwicmRmIjoiSDRzSUFBQUFBQUFBQXd0eWlURG1pdUJpWUdCZ1ptQmhaR0pnWmdVeUdWaERROXgwTFJnWVdKaUFIRVlHRmdaT0VGMEJWQ1FNWklBRUJZQ1lDeXJCVmxSc2FHaG9oTUl6UmVHWm8vQXNVWGpHS0R3TFpKNlJBVExQd0FTRmgycW1DWkRGQjNLVG5WUEN3a1hCMWVaMm04ek5GcXN4YmJiYmUvdmpCZXRvYlh2VmhZRVhSTVRVN0RXTmw2ZmVUR1d4TjF6N2ZNS2xrbW4yZnZrM3AwZDMvckJmdnlkWjdNb25QL3RqOTZvMUZKNnR0VC94U3BoZm9Dc2JMUkJZOHhKelU0dWhBY0FFRldRTzlndUFNdGtMNHNzU2MwcFQwYlJ4RnVXWDY4RzA4b0xEam9HQkI0ajVnVmdRaUlXaDRrSkFMQUxFTENDeklINUN0VDg1SjdFWVpqOU1rQ3Nsc1NSUkw2MElhRDZROXc5TkMzdCtRVWxtZmg1UUV4UElGbFkwell4RmFBTDhwWGtnbDZib0ptZVU1bVhyR2tKZHl3akZ2RkNhQzRuTkJMR1M2VC9VS0ZaWTNLVG1wV2ZtcGNMY25wT1lsSm9ENWZBQlF3UWNJSG9GUlpsNUpUQ2ZBRVdMOVVyeVN4Smg2cmlTODNOZ0ltQy9NZndEQU9vaHhRVzBBZ0FBIn0= -->
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["SNP"],"name":[1],"type":["chr"],"align":["left"]},{"label":["p_value"],"name":[2],"type":["dbl"],"align":["right"]}],"data":[{"1":"rs1112","2":"8.557675e-09","_rn_":"12"},{"1":"rs1115","2":"1.085739e-06","_rn_":"15"},{"1":"rs1117","2":"1.779745e-06","_rn_":"17"},{"1":"rs1119","2":"1.650250e-04","_rn_":"19"},{"1":"rs1113","2":"1.922743e-04","_rn_":"13"},{"1":"rs1118","2":"2.697649e-04","_rn_":"18"},{"1":"rs1120","2":"9.288609e-04","_rn_":"20"},{"1":"rs1104","2":"6.198415e-02","_rn_":"4"},{"1":"rs1107","2":"1.786646e-01","_rn_":"7"},{"1":"rs1114","2":"1.946434e-01","_rn_":"14"}],"options":{"columns":{"min":{},"max":[10],"total":[2]},"rows":{"min":[10],"max":[10],"total":[10]},"pages":{}}}
+  </script>
+</div>
+<!-- rnb-frame-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<div id="b-answer" class="section level4">
+<h4>1 (b) answer:</h4>
+<p>Here we can see that the SNPs with the strongest association (lowest p-values) are:<br />
+1. rs1112<br />
+2. rs1115<br />
+3. rs1117<br />
+4. rs1119<br />
+5. rs1113<br />
+6. rs1118<br />
+7. rs1120<br />
+8. rs1104<br />
+9. rs1107<br />
+10. rs1114</p>
 <!-- rnb-text-end -->
 </div>
 </div>
 </div>
+</div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiTWlkdGVybSAtIFFCUyAxNzciCm91dHB1dDogaHRtbF9ub3RlYm9vawotLS0KClNwZW5jZXIgQmVydHNjaCAgCkZlYi4gMjAyMgoKLS0tLS0tLS0tLS0tCgpTb21lIGhlbHBmdWwgY29tbWFuZHM6ICAKKiBJbnNlcnQgYSBuZXcgY29kZSBjaHVuazogKkNtZCtPcHRpb24rSSogIAoqIFJ1biBhIGNvZGUgY2VsbDogKkNtZCtTaGlmdCtFbnRlciogIAoqIFByZXZpZXcgdGhlIG5vdGVib29rIEhUTUwgZmlsZTogKkNtZCtTaGlmdCtLKiAgCgoKIyMjIEltcG9ydHMgCmBgYHtyfQpsaWJyYXJ5KGdsdWUpCmxpYnJhcnkocXFtYW4pCmBgYAoKRmlyc3Qgd2UgbmVlZCB0byBjaGFuZ2Ugb3VyIGN1cnJlbnQgd29ya2luZyBkaXJlY3RvcnkgdG8gdGhlIGNvcnJlY3QgZGlyZWN0b3J5IGZvciBBc3NpZ25tZW50IDMKYGBge3J9CnNldHdkKCcvVXNlcnMvc3BlbmNlcmJlcnRzY2gvRGVza3RvcC9kZXYvcGhkX2NvdXJzZXMvTUFUSDE3Ny9taWR0ZXJtJykKZ2V0d2QoKQpgYGAKCgojIFF1ZXN0aW9uIDEKIyMjIEltcG9ydCB0aGUgcmF3IGRhdGEgCkhlcmUgd2UgbG9hZCB0aGUgZGF0YSB0aGF0IGNvbnRhaW5zIGFsbCBvZiB0aGUgU05QcyBzbyB3ZSBjYW4gc2VlIHdoaWNoIGFyZSB0aGUgdG9wIGZpdmUgU05QcyB0aGF0IGhhdmUgdGhlIHN0cm9uZ2VzdCBhc3NvY2lhdGlvbiBiYXNlZCBvbiB0aGVpciBwLXZhbHVlcy4gV2UgbGVhcm5lZCBpbiBhc3NpZ25tZW50IDQgYW5kIGxhYiA1IHRoYXQgdGhlIGxvd2VzdCBwLXZhbHVlcyBkZXNpZ25hdGUgdGhlIFNOUHMgdGhhdCBoYXZlIHRoZSBzdHJvbmdlc3QgYXNzb3NpYXRpb24gd2l0aCBhIHJlc3BvbnNlIHZhcmlhYmxlLiAKYGBge3J9CmxvYWQoJ2RicC5SZGF0YScpCmBgYAoKQmVmb3JlIHdlIGNhbiBwcm9ncmVzcyB3aXRoIHF1ZXN0aW9uIDEgKGEpLCB3ZSBuZWVkIHRvIGRvIGEgZmV3IHRoaW5ncy4gCjEuIFdlIG5lZWQgdG8gZmlsbCB0aGUgTkEgdmFsdWVzIGluIG91ciBTTlBzCjIuIFdlIG5lZWQgdG8gYWx0ZXIgdGhlIGRhdGEgdHlwZSBvZiBvdXIgU05QcyBmcm9tIGZhY3RvciB2YXJpYWJsZXMgWzIsIDMsIDRdIHRvIG51bWVyaWMgdmFyaWFibGVzIFswLCAxLCAyXS4KCgpgYGB7cn0KIyBsZXRzIGlzb2xhdGUgdGhlIGNvbHVtbnMgd2UgbmVlZCBmb3IgdGhlIHByb2JsZW0gCnNucC5kYXRhID0gZGJwWyxjKCJhZmZlY3Rpb24iLCAic2V4IiwgImFnZSIsICJyczExMDEiLCAicnMxMTAyIiwgInJzMTEwMyIsICJyczExMDQiLCAicnMxMTA1IiwgInJzMTEwNiIsICJyczExMDciLCAicnMxMTA4IiwgInJzMTEwOSIsICJyczExMTAiLCAicnMxMTExIiwgInJzMTExMiIsICJyczExMTMiLCAicnMxMTE0IiwgInJzMTExNSIsICJyczExMTYiLCAicnMxMTE3IiwgInJzMTExOCIsICJyczExMTkiLCAicnMxMTIwIildCgojIGNvbnZlcnQgYWxsIHRoZSBTTlAgY29sdW1uIHRvIG51bWVyaWMgYW5kIGFkanVzdCB0aGVtIHRvIHRoZSBwcm9wZXIgcmFuZ2UKZm9yIChpIGluIDE6MjApewogIHNucC5kYXRhWywgKGkrMyldIDwtIGFzLm51bWVyaWMoc25wLmRhdGFbLCAoaSszKV0pIC0gMQp9CgpwcmludCgnU3VtbWFyeSBhZnRlciBhbGwgdGhlIFNOUCB2YXJpYWJsZXMgd2VyZSBjaGFuZ2VkIHRvIG51bWVyaWMgdmFyaWFibGVzOicpCnN1bW1hcnkoc25wLmRhdGEpCmBgYApBbmQgaW5kZWVkIHdlIGNhbiBzZWUgdGhhdCB3ZSB3ZXJlIHN1Y2Nlc3NmdWwgaW4gY29udmVydGluZyBhbGwgdGhlIFNOUHMgdG8gbnVtZXJpYyBkdHlwZXMuIAoKIyBRdWVzdGlvbjogRG8gd2UgbmVlZCB0byBkZWFsIHdpdGggTlVMTHMgaGVyZT8gCgpIZXJlIHdlIGV4YW1pbmUgdGhlIG1lYW4gdmFsdWVzIG9mIHRoZSBjb2x1bW5zLiBJZiB0aGUgbWVhbiBpcyBOVUxMLCB0aGF0IG1lYW5zIHRoZXJlIGFyZSBOVUxMIHZhbHVlcyBpbiB0aGUgZGF0YWZyYW1lIHRoYXQgd2UgbmVlZCB0byBmaWxsIHdpdGggYSBtZXRob2Qgc3VjaCBhcyBmb3J3YXJkIGZpbGxpbmcgb3IgbWVhbiB2YWx1ZSByZXBsYWNlbWVudC4KYGBge3J9Cm11ID0gY29sTWVhbnMoc25wLmRhdGFbLGMoInJzMTEwMSIsICJyczExMDIiLCAicnMxMTAzIiwgInJzMTEwNCIsICJyczExMDUiLCAicnMxMTA2IiwgInJzMTEwNyIsICJyczExMDgiLCAicnMxMTA5IiwgInJzMTExMCIsICJyczExMTEiLCAicnMxMTEyIiwgInJzMTExMyIsICJyczExMTQiLCAicnMxMTE1IiwgInJzMTExNiIsICJyczExMTciLCAicnMxMTE4IiwgInJzMTExOSIsICJyczExMjAiKV0pCnByaW50KG11WzA6MTBdKQpgYGAKQW5kIHdlIGNhbiBzZWUgdGhhdCBzb21lIG9mIG91ciBTTlAgY29sdW1ucyBjb250YWluIG51bGwgdmFsdWVzISBTbyB3ZSBjYW4gc2ltcGx5IG1lYW4gZmlsbCBvciBmb3J3YXJkIGZpbGwgdGhlc2UgdmFsdWVzIGFuZCBtb3ZlIG9uLiAKCiMjIFRPRE8gbWVhbiBmaWxsIG9yIGZvcndhcmQgZmlsbCB0aGUgTkFzCmBgYHtyfQojIFRPRE8gZmlsbCBOQXMKYGBgCgoKIyMjIFF1ZXN0aW9uIDEoYSk6CkhlcmUgd2Ugd2FudCB0byB1c2UgYSBmb3IgbG9vcCB0byBpdGVyYXRlIG92ZXIgYWxsIG9mIHRoZSBTTlBzIGluIG91ciBkYXRhIHNldC4gSGVyZSB3ZSB3YW50IHRvIGl0ZXJhdGUgZnJvbSB0aGUgOXRoIGNvbHVtbiB0byB0aGUgMjh0aCBjb2x1bW4gdG8gY2FwdHVyZSBhbGwgdGhlIFNOUHMuIFRoYXQgd2F5IHdlIHdpbGwgY2FwdHVyZSBlYWNoIG9mIHRoZSAyMCBTTlBzIGluIHRoZSBkYXRhIHNldC4gCmBgYHtyfQpwdmFsdWUgPC0gMAoKZm9yIChpIGluIDE6MjApewoKICAjIGZpcnN0IHdlIG5lZWQgdG8gZml0IHRoZSBsb2dpc3RpYyByZWdyZXNzaW9uIG1vZGVsIG9uIHRoZSBTTlAsIGFkanVzdGluZyBmb3IgdGhlIGFnZSBhbmQgc2V4IG9mIHRoZSBwYXRpZW50IAogIHJlc3VsdC5hZGogPC0gZ2xtKGFmZmVjdGlvbiB+IHNleCArIGFnZSArIHNucC5kYXRhWywoaSszKV0sIGZhbWlseT1iaW5vbWlhbCgibG9naXQiKSwgZGF0YT1zbnAuZGF0YSkKICAKICAjIG5leHQgd2UgZ3JhYiB0aGUgY29ycmVzcG9uZGluZyBwLXZhbHVlIGFuZCBzdG9yZSBpdCBvdXRzaWRlIHRoZSBsb29wCiAgcHZhbHVlW2ldIDwtIHN1bW1hcnkocmVzdWx0LmFkaikkY29lZls0LDRdICMgVE9ETyA8LS0gZG91YmxlIGNoZWNrIHRoaXMgcC12YWx1ZSBpcyByaWdodCwgd2Ugd2FudCB0aGUgb25lIGNvcnJlc3BvbmRpbmcgdG8gdGhlIFNOUCwgY29ycmVjdD8gSSB0aGluayB0aGF0J3MgY29ycmVjdC4gCn0KCnB2YWx1ZVswOjEwXQpgYGAKCgoKCgo=</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiTWlkdGVybSAtIFFCUyAxNzciCm91dHB1dDogaHRtbF9ub3RlYm9vawotLS0KClNwZW5jZXIgQmVydHNjaCAgCkZlYi4gMjAyMgoKLS0tLS0tLS0tLS0tCgpTb21lIGhlbHBmdWwgY29tbWFuZHM6ICAKKiBJbnNlcnQgYSBuZXcgY29kZSBjaHVuazogKkNtZCtPcHRpb24rSSogIAoqIFJ1biBhIGNvZGUgY2VsbDogKkNtZCtTaGlmdCtFbnRlciogIAoqIFByZXZpZXcgdGhlIG5vdGVib29rIEhUTUwgZmlsZTogKkNtZCtTaGlmdCtLKiAgCgoqKk9QRU4gUVVFU1RJT05TOioqCjEuIERvIHdlIG5lZWQgdG8gZmlsbCB0aGUgTkFzIGluIHRoZSBTTlAgZGF0YSBmb3IgcXVlc3Rpb24gMT8gVGhlIGNvZGUgd29ya3MganVzdCBmaW5lIGlmIHdlIGRvbid0IGZpbGwgdGhlIE5BcywgYnV0IG1heWJlIHdlIHNob3VsZCBmaWxsIHdpdGggdGhlIG1lYW4gdmFsdWUgbGlrZSB3ZSBkaWQgaW4gdGhlIGhvbWV3b3JrPyAKCgojIyMgSW1wb3J0cyAKYGBge3J9CmxpYnJhcnkoZ2x1ZSkKbGlicmFyeShxcW1hbikKYGBgCgpGaXJzdCB3ZSBuZWVkIHRvIGNoYW5nZSBvdXIgY3VycmVudCB3b3JraW5nIGRpcmVjdG9yeSB0byB0aGUgY29ycmVjdCBkaXJlY3RvcnkgZm9yIEFzc2lnbm1lbnQgMwpgYGB7cn0Kc2V0d2QoJy9Vc2Vycy9zcGVuY2VyYmVydHNjaC9EZXNrdG9wL2Rldi9waGRfY291cnNlcy9NQVRIMTc3L21pZHRlcm0nKQpnZXR3ZCgpCmBgYAoKCiMgUXVlc3Rpb24gMQojIyMgSW1wb3J0IHRoZSByYXcgZGF0YSAKSGVyZSB3ZSBsb2FkIHRoZSBkYXRhIHRoYXQgY29udGFpbnMgYWxsIG9mIHRoZSBTTlBzIHNvIHdlIGNhbiBzZWUgd2hpY2ggYXJlIHRoZSB0b3AgZml2ZSBTTlBzIHRoYXQgaGF2ZSB0aGUgc3Ryb25nZXN0IGFzc29jaWF0aW9uIGJhc2VkIG9uIHRoZWlyIHAtdmFsdWVzLiBXZSBsZWFybmVkIGluIGFzc2lnbm1lbnQgNCBhbmQgbGFiIDUgdGhhdCB0aGUgbG93ZXN0IHAtdmFsdWVzIGRlc2lnbmF0ZSB0aGUgU05QcyB0aGF0IGhhdmUgdGhlIHN0cm9uZ2VzdCBhc3Nvc2lhdGlvbiB3aXRoIGEgcmVzcG9uc2UgdmFyaWFibGUuIApgYGB7cn0KbG9hZCgnZGJwLlJkYXRhJykKYGBgCgpCZWZvcmUgd2UgY2FuIHByb2dyZXNzIHdpdGggcXVlc3Rpb24gMSAoYSksIHdlIG5lZWQgdG8gZG8gYSBmZXcgdGhpbmdzLiAKMS4gV2UgbmVlZCB0byBmaWxsIHRoZSBOQSB2YWx1ZXMgaW4gb3VyIFNOUHMKMi4gV2UgbmVlZCB0byBhbHRlciB0aGUgZGF0YSB0eXBlIG9mIG91ciBTTlBzIGZyb20gZmFjdG9yIHZhcmlhYmxlcyBbMiwgMywgNF0gdG8gbnVtZXJpYyB2YXJpYWJsZXMgWzAsIDEsIDJdLgoKCmBgYHtyfQojIGxldHMgaXNvbGF0ZSB0aGUgY29sdW1ucyB3ZSBuZWVkIGZvciB0aGUgcHJvYmxlbSAKc25wLmRhdGEgPSBkYnBbLGMoImFmZmVjdGlvbiIsICJzZXgiLCAiYWdlIiwgInJzMTEwMSIsICJyczExMDIiLCAicnMxMTAzIiwgInJzMTEwNCIsICJyczExMDUiLCAicnMxMTA2IiwgInJzMTEwNyIsICJyczExMDgiLCAicnMxMTA5IiwgInJzMTExMCIsICJyczExMTEiLCAicnMxMTEyIiwgInJzMTExMyIsICJyczExMTQiLCAicnMxMTE1IiwgInJzMTExNiIsICJyczExMTciLCAicnMxMTE4IiwgInJzMTExOSIsICJyczExMjAiKV0KCiMgY29udmVydCBhbGwgdGhlIFNOUCBjb2x1bW4gdG8gbnVtZXJpYyBhbmQgYWRqdXN0IHRoZW0gdG8gdGhlIHByb3BlciByYW5nZQpmb3IgKGkgaW4gMToyMCl7CiAgc25wLmRhdGFbLCAoaSszKV0gPC0gYXMubnVtZXJpYyhzbnAuZGF0YVssIChpKzMpXSkgLSAxCn0KCnByaW50KCdTdW1tYXJ5IGFmdGVyIGFsbCB0aGUgU05QIHZhcmlhYmxlcyB3ZXJlIGNoYW5nZWQgdG8gbnVtZXJpYyB2YXJpYWJsZXM6JykKc3VtbWFyeShzbnAuZGF0YSkKYGBgCkFuZCBpbmRlZWQgd2UgY2FuIHNlZSB0aGF0IHdlIHdlcmUgc3VjY2Vzc2Z1bCBpbiBjb252ZXJ0aW5nIGFsbCB0aGUgU05QcyB0byBudW1lcmljIGR0eXBlcy4gCgojIFF1ZXN0aW9uOiBEbyB3ZSBuZWVkIHRvIGRlYWwgd2l0aCBOVUxMcyBoZXJlPyAKCkhlcmUgd2UgZXhhbWluZSB0aGUgbWVhbiB2YWx1ZXMgb2YgdGhlIGNvbHVtbnMuIElmIHRoZSBtZWFuIGlzIE5VTEwsIHRoYXQgbWVhbnMgdGhlcmUgYXJlIE5VTEwgdmFsdWVzIGluIHRoZSBkYXRhZnJhbWUgdGhhdCB3ZSBuZWVkIHRvIGZpbGwgd2l0aCBhIG1ldGhvZCBzdWNoIGFzIGZvcndhcmQgZmlsbGluZyBvciBtZWFuIHZhbHVlIHJlcGxhY2VtZW50LgpgYGB7cn0KU05QcyA8LSBjKCJyczExMDEiLCAicnMxMTAyIiwgInJzMTEwMyIsICJyczExMDQiLCAicnMxMTA1IiwgInJzMTEwNiIsICJyczExMDciLCAicnMxMTA4IiwgInJzMTEwOSIsICJyczExMTAiLCAicnMxMTExIiwgInJzMTExMiIsICJyczExMTMiLCAicnMxMTE0IiwgInJzMTExNSIsICJyczExMTYiLCAicnMxMTE3IiwgInJzMTExOCIsICJyczExMTkiLCAicnMxMTIwIikKbXUgPSBjb2xNZWFucyhzbnAuZGF0YVssIFNOUHNdKQpwcmludChtdVswOjEwXSkKYGBgCkFuZCB3ZSBjYW4gc2VlIHRoYXQgc29tZSBvZiBvdXIgU05QIGNvbHVtbnMgY29udGFpbiBudWxsIHZhbHVlcyEgU28gd2UgY2FuIHNpbXBseSBtZWFuIGZpbGwgb3IgZm9yd2FyZCBmaWxsIHRoZXNlIHZhbHVlcyBhbmQgbW92ZSBvbi4gCgojIyBUT0RPIG1lYW4gZmlsbCBvciBmb3J3YXJkIGZpbGwgdGhlIE5BcwpgYGB7cn0KIyBUT0RPIGZpbGwgTkFzCmBgYAoKCiMjIyBRdWVzdGlvbiAxKGEpOgpIZXJlIHdlIHdhbnQgdG8gdXNlIGEgZm9yIGxvb3AgdG8gaXRlcmF0ZSBvdmVyIGFsbCBvZiB0aGUgU05QcyBpbiBvdXIgZGF0YSBzZXQuIEhlcmUgd2Ugd2FudCB0byBpdGVyYXRlIGZyb20gdGhlIDl0aCBjb2x1bW4gdG8gdGhlIDI4dGggY29sdW1uIHRvIGNhcHR1cmUgYWxsIHRoZSBTTlBzLiBUaGF0IHdheSB3ZSB3aWxsIGNhcHR1cmUgZWFjaCBvZiB0aGUgMjAgU05QcyBpbiB0aGUgZGF0YSBzZXQuIApgYGB7cn0KcHZhbHVlIDwtIDAKCmZvciAoaSBpbiAxOjIwKXsKCiAgIyBmaXJzdCB3ZSBuZWVkIHRvIGZpdCB0aGUgbG9naXN0aWMgcmVncmVzc2lvbiBtb2RlbCBvbiB0aGUgU05QLCBhZGp1c3RpbmcgZm9yIHRoZSBhZ2UgYW5kIHNleCBvZiB0aGUgcGF0aWVudCAKICByZXN1bHQuYWRqIDwtIGdsbShhZmZlY3Rpb24gfiBzZXggKyBhZ2UgKyBzbnAuZGF0YVssKGkrMyldLCBmYW1pbHk9Ymlub21pYWwoImxvZ2l0IiksIGRhdGE9c25wLmRhdGEpCiAgCiAgIyBuZXh0IHdlIGdyYWIgdGhlIGNvcnJlc3BvbmRpbmcgcC12YWx1ZSBhbmQgc3RvcmUgaXQgb3V0c2lkZSB0aGUgbG9vcAogIHB2YWx1ZVtpXSA8LSBzdW1tYXJ5KHJlc3VsdC5hZGopJGNvZWZbNCw0XSAjIFRPRE8gPC0tIGRvdWJsZSBjaGVjayB0aGlzIHAtdmFsdWUgaXMgcmlnaHQsIHdlIHdhbnQgdGhlIG9uZSBjb3JyZXNwb25kaW5nIHRvIHRoZSBTTlAsIGNvcnJlY3Q/IEkgdGhpbmsgdGhhdCdzIGNvcnJlY3QuIAp9CgpwdmFsdWVbMDoxMF0KCnBfdmFsdWVfZGYgPC0gZGF0YS5mcmFtZShTTlAgPSBTTlBzLCBwX3ZhbHVlID0gcHZhbHVlKQpwX3ZhbHVlX2RmIDwtIHBfdmFsdWVfZGZbb3JkZXIocF92YWx1ZV9kZiRwX3ZhbHVlLCBkZWNyZWFzaW5nPUZBTFNFKSwgXQpoZWFkKHBfdmFsdWVfZGYsIDUpCmBgYAojIyMjIDEgKGEpIGFuc3dlcjogCkhlcmUgd2UgY2FuIHNlZSB0aGF0IHRoZSBTTlBzIHdpdGggdGhlIHN0cm9uZ2VzdCBhc3NvY2lhdGlvbiAobG93ZXN0IHAtdmFsdWVzKSBhcmU6ICAKMS4gcnMxMTEyICAKMi4gcnMxMTE1ICAKMy4gcnMxMTE3ICAKNC4gcnMxMTE5ICAKNS4gcnMxMTEzICAKCiMjIyBRdWVzdGlvbiAxKGIpOgoKTm93IHRoYXQgd2UgdHJhaW5lZCBvdXIgbG9naXN0aWMgcmVncmVzc2lvbiBtb2RlbCBhbmQgZ290IHRoZSBhc3NvY2lhdGVkIHAtdmFsdWVzLCB3ZSBuZWVkIHRvIHRyYWluIGEgbGluZWFyIHJlZ3Jlc3Npb24gbW9kZWwgYW5kIGdldCB0aGUgcC12YWx1ZXMgdGhlcmUgYXMgd2VsbC4gCgpMZXQncyBmaWxsIHRoZSBOQXMgaGVyZTogKE9QVElPTkFMIC0gZG8gd2UgbmVlZCB0byBmaWxsIHRoZSBOQXM/PykKYGBge3J9CiMgZm9yIChpIGluIDE6MjApewojICAgc25wLmRhdGFbaXMubmEoc25wLmRhdGFbLChpKzMpXSksIChpKzMpXSA8LSByb3VuZChtZWFuKHNucC5kYXRhWywoaSszKV0sIG5hLnJtID0gVFJVRSkpCiMgfQojIHN1bShpcy5uYShzbnAuZGF0YSkpCmBgYAoKTm93IHRoYXQgd2UndmUgZmlsbGVkIHRoZSBOQXMgd2l0aCB0aGUgbWVhbiBmcm9tIGVhY2ggU05QLCB3ZSBjYW4gdHJhaW4gb3VyIGxpbmVhciByZWdyZXNzaW9uIG1vZGVscyBhbmQgZmluZCB0aGUgYXNzb2NpYXRpb25zIGJldHdlZW4gZWFjaCBTTlAgYW5kIHRoZSBhZmVjdGlvbiwgYWRqdXN0aW5nIGZvciBhZ2UgYW5kIHNleC4gCgpMZXQncyBhbHNvIGNoYW5nZSB0aGUgcmVzcG9uc2UgdmFyaWFibGUgZnJvbSBhIGZhY3RvciB0byBhIG51bWVyaWMgcmVzcG9uc2UhIFdlIG5lZWQgdG8gZG8gdGhpcyBmb3Igb3VyIGxpbmVhciByZWdyZXNzaW9uIG1vZGVsIHdoaWNoIHByZWRpY3RzIGEgY29udGludW91cyB2YXJpYWJsZSAtIG5vdCBhIGZhY3RvciB2YXJpYWJsZS4gCmBgYHtyfQpzbnAuZGF0YSRhZmZlY3Rpb24gPC0gYXMubnVtZXJpYyhzbnAuZGF0YSRhZmZlY3Rpb24pCmBgYAoKCmBgYHtyfQpwdmFsdWUgPC0gMAoKZm9yIChpIGluIDE6MjApewoKICAjIGZpcnN0IHdlIG5lZWQgdG8gZml0IHRoZSBsaW5lYXIgcmVncmVzc2lvbiBtb2RlbCBvbiB0aGUgU05QLCBhZGp1c3RpbmcgZm9yIHRoZSBhZ2UgYW5kIHNleCBvZiB0aGUgcGF0aWVudAogIGZpdCA8LSBsbShhZmZlY3Rpb24gfiBzZXggKyBhZ2UgKyBzbnAuZGF0YVssKGkrMyldLCBkYXRhPXNucC5kYXRhKQogIAogICMgbmV4dCB3ZSBncmFiIHRoZSBjb3JyZXNwb25kaW5nIHAtdmFsdWUgYW5kIHN0b3JlIGl0IG91dHNpZGUgdGhlIGxvb3AKICBwdmFsdWVbaV0gPC0gc3VtbWFyeShmaXQpJGNvZWZbNCw0XQp9CgpwdmFsdWVbMDoxMF0KCnBfdmFsdWVfZGYgPC0gZGF0YS5mcmFtZShTTlAgPSBTTlBzLCBwX3ZhbHVlID0gcHZhbHVlKQpwX3ZhbHVlX2RmIDwtIHBfdmFsdWVfZGZbb3JkZXIocF92YWx1ZV9kZiRwX3ZhbHVlLCBkZWNyZWFzaW5nPUZBTFNFKSwgXQpoZWFkKHBfdmFsdWVfZGYsIDEwKQpgYGAKCiMjIyMgMSAoYikgYW5zd2VyOiAKSGVyZSB3ZSBjYW4gc2VlIHRoYXQgdGhlIFNOUHMgd2l0aCB0aGUgc3Ryb25nZXN0IGFzc29jaWF0aW9uIChsb3dlc3QgcC12YWx1ZXMpIGFyZTogIAoxLiByczExMTIgIAoyLiByczExMTUgIAozLiByczExMTcgIAo0LiByczExMTkgIAo1LiByczExMTMgIAo2LiByczExMTggIAo3LiByczExMjAgIAo4LiByczExMDQgIAo5LiByczExMDcgIAoxMC4gcnMxMTE0ICAKCgo=</div>
 
 
 

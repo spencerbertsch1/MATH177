@@ -13,6 +13,9 @@ Some helpful commands:
 * Run a code cell: *Cmd+Shift+Enter*  
 * Preview the notebook HTML file: *Cmd+Shift+K*  
 
+**OPEN QUESTIONS:**
+1. Do we need to fill the NAs in the SNP data for question 1? The code works just fine if we don't fill the NAs, but maybe we should fill with the mean value like we did in the homework? 
+
 
 ### Imports 
 ```{r}
@@ -57,7 +60,8 @@ And indeed we can see that we were successful in converting all the SNPs to nume
 
 Here we examine the mean values of the columns. If the mean is NULL, that means there are NULL values in the dataframe that we need to fill with a method such as forward filling or mean value replacement.
 ```{r}
-mu = colMeans(snp.data[,c("rs1101", "rs1102", "rs1103", "rs1104", "rs1105", "rs1106", "rs1107", "rs1108", "rs1109", "rs1110", "rs1111", "rs1112", "rs1113", "rs1114", "rs1115", "rs1116", "rs1117", "rs1118", "rs1119", "rs1120")])
+SNPs <- c("rs1101", "rs1102", "rs1103", "rs1104", "rs1105", "rs1106", "rs1107", "rs1108", "rs1109", "rs1110", "rs1111", "rs1112", "rs1113", "rs1114", "rs1115", "rs1116", "rs1117", "rs1118", "rs1119", "rs1120")
+mu = colMeans(snp.data[, SNPs])
 print(mu[0:10])
 ```
 And we can see that some of our SNP columns contain null values! So we can simply mean fill or forward fill these values and move on. 
@@ -83,9 +87,69 @@ for (i in 1:20){
 }
 
 pvalue[0:10]
+
+p_value_df <- data.frame(SNP = SNPs, p_value = pvalue)
+p_value_df <- p_value_df[order(p_value_df$p_value, decreasing=FALSE), ]
+head(p_value_df, 5)
+```
+#### 1 (a) answer: 
+Here we can see that the SNPs with the strongest association (lowest p-values) are:  
+1. rs1112  
+2. rs1115  
+3. rs1117  
+4. rs1119  
+5. rs1113  
+
+### Question 1(b):
+
+Now that we trained our logistic regression model and got the associated p-values, we need to train a linear regression model and get the p-values there as well. 
+
+Let's fill the NAs here: (OPTIONAL - do we need to fill the NAs??)
+```{r}
+# for (i in 1:20){
+#   snp.data[is.na(snp.data[,(i+3)]), (i+3)] <- round(mean(snp.data[,(i+3)], na.rm = TRUE))
+# }
+# sum(is.na(snp.data))
+```
+
+Now that we've filled the NAs with the mean from each SNP, we can train our linear regression models and find the associations between each SNP and the afection, adjusting for age and sex. 
+
+Let's also change the response variable from a factor to a numeric response! We need to do this for our linear regression model which predicts a continuous variable - not a factor variable. 
+```{r}
+snp.data$affection <- as.numeric(snp.data$affection)
 ```
 
 
+```{r}
+pvalue <- 0
 
+for (i in 1:20){
+
+  # first we need to fit the linear regression model on the SNP, adjusting for the age and sex of the patient
+  fit <- lm(affection ~ sex + age + snp.data[,(i+3)], data=snp.data)
+  
+  # next we grab the corresponding p-value and store it outside the loop
+  pvalue[i] <- summary(fit)$coef[4,4]
+}
+
+pvalue[0:10]
+
+p_value_df <- data.frame(SNP = SNPs, p_value = pvalue)
+p_value_df <- p_value_df[order(p_value_df$p_value, decreasing=FALSE), ]
+head(p_value_df, 10)
+```
+
+#### 1 (b) answer: 
+Here we can see that the SNPs with the strongest association (lowest p-values) are:  
+1. rs1112  
+2. rs1115  
+3. rs1117  
+4. rs1119  
+5. rs1113  
+6. rs1118  
+7. rs1120  
+8. rs1104  
+9. rs1107  
+10. rs1114  
 
 
