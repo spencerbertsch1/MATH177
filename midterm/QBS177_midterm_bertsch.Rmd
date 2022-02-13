@@ -14,8 +14,11 @@ Some helpful commands:
 * Preview the notebook HTML file: *Cmd+Shift+K*  
 
 **OPEN QUESTIONS:**
-1. Do we need to fill the NAs in the SNP data for question 1? The code works just fine if we don't fill the NAs, but maybe we should fill with the mean value like we did in the homework? 
+Question (1) How do we do part (d)? 
 
+Question (3) Is it okay to use confint to find the confidence intervals? Is it alright that I looked up how to do that on Stack Overflow? 
+
+ Question (3) - Shouldn't **n** be 50 (the number of samples)? If I set it to 50 then my upper and lower bounds are way off, but if I set it to 21 (number of predictor variables) then they match perfectly. Hmmm... 
 
 ### Imports 
 ```{r}
@@ -104,7 +107,7 @@ Here we can see that the SNPs with the strongest association (lowest p-values) a
 
 Now that we trained our logistic regression model and got the associated p-values, we need to train a linear regression model and get the p-values there as well. 
 
-Let's fill the NAs here: (OPTIONAL - do we need to fill the NAs??)
+Let's fill the NAs here: (OPTIONAL)
 ```{r}
 # for (i in 1:20){
 #   snp.data[is.na(snp.data[,(i+3)]), (i+3)] <- round(mean(snp.data[,(i+3)], na.rm = TRUE))
@@ -177,7 +180,6 @@ get_indices_smallest_values <- function(matrix) {
     # stores indexes of min value
     min = which(matrix == min(matrix), arr.ind = TRUE)  
     print(paste("Minimum value: ", matrix[min]))
-    print(min)
     
     # get the SNPs and the corresponding p-value
     index_1 <- as.integer(min[1,1])
@@ -192,13 +194,16 @@ get_indices_smallest_values <- function(matrix) {
     p_vals[i] <- p_val
     
     # set the two values of the old smallest value to 1 and continue 
+    matrix[index_1, index_2] = 1
+    matrix[index_2, index_1] = 1
     
   }
   
   # create a data frame out of the three lists that store the results 
+  df <- data.frame(A = SNPs_1, B = SNPs_2, C = p_vals)
   
   # return the data frame 
-  return(min)
+  return(df)
 }
 ```
 
@@ -219,31 +224,386 @@ for (i in 1:20){
   for (j in 1:20){
     
     # first we need to fit the logistic regression model on the SNP, adjusting for the age and sex of the patient
-    result.adj <- glm(affection ~ sex + age + snp.data[,(i+3)]:snp.data[,(j+3)], family=binomial("logit"), data=snp.data)
+    result.adj <- glm(affection ~ sex + age + snp.data[,(i+3)]*snp.data[,(j+3)], family=binomial("logit"), data=snp.data)
     
     # next we grab the corresponding p-value and store it outside the loop
     pvalue_mat[i,j] <- summary(result.adj)$coef[4,4] 
   }
 }
 
-# pvalue[0:10]
-
-# p_value_df <- data.frame(SNP = SNPs, p_value = pvalue)
-# p_value_df <- p_value_df[order(p_value_df$p_value, decreasing=FALSE), ]
-# head(p_value_df, 5)
 ```
 
 
-### Some test code 
+And finally we can call our initial *get_indices_smallest_values* function to get the solution to the problem. 
 ```{r}
-min <- get_indices_smallest_values(matrix=pvalue_mat)
+df <- get_indices_smallest_values(matrix=pvalue_mat)
+head(df, 10)
+```
 
-index_1 <- as.integer(min[1,1])
-index_2 <- as.integer(min[1,2])
-snp1 <- SNPs[index_1]
-snp2 <- SNPs[index_2]
-p_val <- pvalue_mat[index_1, index_2]
+#### 1 (c) answer: 
+So above we see the solution - the following are the top 10 SNP-SNP interactions with the strongest association:  
+
+1. [rs1112	rs1109]  
+2. [rs1112	rs1110]  
+3. [rs1116	rs1112]  
+4. [rs1112	rs1105]  
+5. [rs1112	rs1112]  
+6. [rs1112	rs1103]  
+7. [rs1117	rs1109]  
+8. [rs1117	rs1110]  
+9. [rs1115	rs1115]  
+10. [rs1120	rs1112]  
+
+We can also see the p-values corresponding to each pair in the above table. 
+
+### Question 1(d):
+
+TODO 
+
+
+# Question 2
+### Import the raw data 
+Here we load the fulldat data set. 
+
+```{r}
+# load fulldat.txt
+data <- read.table("fulldat.txt", header=F)
+dim(data)
+y <- data[,1]
+x <- data[,3:7401]
+```
+
+We can see that we have only 240 observations, and 7401 variables! This is an interesting data set to use for supervised learning because the number of samples << the number of predictor variables which is not usually the case. 
+
+\n
+This is a perfect use case for Lasso regression! I'm glad to see such a great use case, I've never come across a data set that presents such a strong need for a model that forces the coefficients associated with unimportant predictors to zero. If I'm understanding the task of this problem correctly, we need to run a Lasso regression on the training set that's generated from the data imported above. That Lasso model will no doubt drop many of our 7401 predictor variables by shrinking the weights for those variables down to zero. That model on its own could be very performant, but we're to examine which of the predictor variables were chosen and isolate those, then train a step-wise regression model using **only** those predictors, and determine its performance using our test (holdout) data set. 
+
+I think the interesting part of this problem will be to compare the test performance of our initial Lasso model against the step-wise regression model that get's trained on the genes (predictor variables, features) that are chosen consistently by Lasso over 100 trials. Which one will perform better? Let's find out! 
+
+```{r}
+# load the libraries we need for this problem 
+library(survival)
+library(glmnet)
+
+# we can set the seed here to get the same results for different random trials 
+set.seed(1)
+
+# randomly divide the data in to training and testing
+train <- sample(1:240,160,replace=FALSE) 
+test <- (1:240)[-train]
+
+xtrain <- data[train,]
+xtest <- data[test,]
+```
+
+We now have two data sets with the following dimensions: 
+1. xtrain: [160 x 7401]
+1. xtest: [80 x 7401]
+
+We now want to create an empty matrix filled with zeros so that we can populate the matrix later on. We can do that with the `matrix` command in r. We want out matrix to have 7399 rows and 100 columns. 
+
+```{r}
+# create the coefout matrix with dimensions [7399 x 100] - initialize the matrix as a zero matrix 
+coefout <- matrix(0, 7399, 100)
+```
+
+Now that we have our coefout matrix initialized, we can run the loop that populates it. 
+
+```{r}
+# loop 100 times, once for each of the trials 
+  for (i in 1:100){
+  
+    # create an array of integers that represent the sample IDs for 120 samples
+    id <- sample(1:160, 120)
+    
+    # subset out training data to only include the samples chosen above 
+    data1 <- xtrain[id, ]
+    
+    # we can now isolate the column that contains the survival times (I assume years survived)
+    surv <- data1[,1]
+    
+    # we now remove the non-predictor columns from our data set to isolate our predictors (genes) 
+    gene <- data1[, -(1:2)]
+    x <- as.matrix(gene)
+    
+    # here we fit out lasso model 
+    fit2 <- glmnet(x,surv)
+    
+    # and here we perform a cross validation for our lasso model across many values for lambda.
+    # just because we use Lasso here doesn't mean we know the best value for Lambda (that's what we find here)
+    cvfit = cv.glmnet(x, surv)
+    
+    # some optimal plotting and data inspection - we don't want to do this at each iteration in the loop
+    #plot(cvfit)
+    #cvfit$lambda.min
+    
+    # here we find the coefficient values for our Lasso model. Remember this is Lasso, not Ridge! So many 
+    # of the values here should be zero 
+    coef.min = coef(cvfit, s = "lambda.min")[-1]
+    
+    # and lastly we can take the coefficients that are NOT zero and add them to the coefout outside of the loop
+    coefout[,i] <- as.numeric(coef.min!=0)
+    
+    # we can use these two lines to find the coefficients that were non-zero 
+    #active.min = which(coef.min != 0)
+    #index.min = coef.min[active.min]
+
+}
+```
+
+
+So not only do we get to examine which of the 7399 coefficients were driven to zero, but we get to repeat the experiment with different, random 2/3 subsets of the training data 100 times and examine the performance! Pretty neat. 
+
+
+```{r}
+# stepwise code
+
+K = 25
+
+# coeffout1 gives us a vector of length 7399 in which we have a value for each predictor variable. The larger 
+# the value, the more times that predictor was chosen by Lasso during the 100 trials in the previous step. 
+coefout1 <- apply(coefout, 1, sum)
+
+# here we use the value of K to only take the top (most important) predictors for use in the stepwise 
+# regression model 
+# we only keep values here if they were chosen by more than K trials of our Lasso model 
+active.min = which(coefout1>K)  
+
+# and lastly we can create a new training set called Xsub in which we use ONLY the predictor variables 
+# that made it through the cutoff above 
+Xsub <- x[,active.min]
+```
+
+
+We can now find and report the 'best' genes found by Lasso. We can do this by simply sorting our coefout1 vector and finding the corresponding indices for each of the max values. 
+
+```{r}
+# create a data frame with an index storing values of Lasso coefficient values 
+best_genes <- data.frame(Gene_Number = c(1:length(coefout1)), Lasso_Selections = coefout1)
+
+# we can now sort the dataframe based on the number of times each gene was chosen and display the best ones
+best_genes <- best_genes[order(best_genes$Lasso_Selections, decreasing=TRUE), ]
+head(best_genes, 10)
+```
+#### Question 2 answer (part I): Report genes consistently chosen by Lasso
+Some of the genes that are consistently chosen by lasso are:  
+1. 4131  
+2. 1020  
+3. 4762  
+4. 5777  
+5. 3191  
+
+Even more of the genes that were consistently chosen can be seen in the above table. Each of the above genes is also displayed alongside the number of times it was chosen by the Lasso model. If a grader wants to see more genes, then feel free to take the head showing more of the top records above. 
+
+
+#### Train our stepwise regression
+And finally we get to jump in and write the rest of the code. Here we want to just run a stepwise regression using the `Xsub` data set created above. 
+
+
+Perform a rewrite using the code from Lab5 (steps 1-4) 
+```{r}
+data <- read.table("fulldat.txt", header=F)
+data[1:3,1:10]
+y <- data[,1]
+# include all the predictors in x
+x <- data[,3:(dim(data)[2])]
+# now only include the predictors that were chosen by Lasso
+x <- x[,active.min]
+
+workingD <- data.frame(cbind(y,x))
+```
+
+
+```{r}
+set.seed(1)
+
+# randomly divide the data in to training and testing
+train <- sample(1:240,160,replace=FALSE) 
+test <- (1:240)[-train]
+```
+
+
+```{r}
+fit1 <- lm(y ~ ., workingD, subset=train)
+fit2 <- lm(y ~ 1, workingD, subset=train)
+step1 <- step(fit1,direction="both")  #both direction
+step2 <- step(fit1,direction="backward") #backward 
+step3 <- step(fit2,direction="forward",scope=list(upper=fit1,lower=fit2))  #forward
+summary(step1)
+summary(step2)
+summary(step3)
+```
+
+```{r}
+tempname <- names(step1$coef) 
+colname <- match(tempname[-1], names(x)) #Model identification
+predscore <- as.matrix(x[test,colname])%*%step1$coef[-1] #testing score
+summary(lm(y[test]~predscore))
+
+p_val <- summary(lm(y[test]~predscore))$coef[2,4] 
+print(p_val)
+```
+
+#### Question 2 answer (part II): 
+We can see that, for a K value of **K=25**, we get a p_value of **0.07001617** in the resulting model. We can see from the p-value that the results are not significant, so the model that performed well on the training set did not perform quite as well on the testing set. This makes sense because we're trying to use people's genes to predict how long they have to live, which is an incredibly difficult task. It would be surprising if our stepwise regression model was able to perform well, so it's not surprising to see an adjusted r-squared of 0.02918. 
+
+# Question 3
+
+### Import the raw data 
+Here we load the data that contains the data that will be used for linear regression models. This Rdata contains a response vairbale
+**y** in addition to the **reduceddat** in which each row will become a predictor. 
+
+```{r}
+load('lab2.Rdata')
+```
+
+Our job here is to first use a loop to iterate through each of the rows in the **reduceddat** matrix and use each row as a predictor for the response variabe **yy**. Then we need to report the regression slope and the 95% confidence interval for each iteration. 
+
+\n
+First we can prepare our data for regression: 
+```{r}
+# here we need to grab the actual vector of responses from the data frame
+y <- yy[, 2]
+
+# and we can define the number of rows we will iterate over
+row_count <- length(reducedat[,1])
+```
+
+#### Question 3 (a)
+It's pretty simple to extract the slope from the coefficients of the trained linear model on each iteration, and according to [this stack overflow article](https://stackoverflow.com/questions/15180008/how-to-calculate-the-95-confidence-interval-for-the-slope-in-a-linear-regressio) we can also easily calculate the 95% confidence interval for the slope of the univariate regression using `confint`. So that's what I implement here. 
+
+```{r}
+slope <- 0
+CI_2.5 <- 0
+CI_97.5 <- 0
+
+for (i in 1:row_count){
+  
+  coeff <- 1.96
+
+  # first we need to fit the linear regression model on the current row of the reducedat matrix
+  fit <- lm(y ~ reducedat[i,])
+  
+  # next we grab the corresponding slope and store it outside the loop
+  current_slope <- summary(fit)$coef[2,1] 
+  slope[i] <- current_slope
+  
+  # we can now calculate the 95% confidence interval manually by adding and subtracting two times 
+  # the standard error to get the 2.5% lower bound and the 97.5% upper bound respectively. 
+  std_error <- summary(fit)$coef[2,2] 
+  
+  # here we can calculate the 95% confidence interval 
+  CI_2.5[i] <- current_slope - (coeff*std_error)
+  CI_97.5[i] <- current_slope + (coeff*std_error)
+}
+
+slope[0:10]
+```
+
+
+And now all we need to do is turn these vectors into a dataframe and present our results! 
+```{r}
+results <- data.frame(slope, CI_2.5, CI_97.5)
+results
+```
+#### Question 3 answer (a): 
+See the above table for the results. That table contains the slopes, and the upper and lower bounds on the 95% confidence interval for each of the 50 regressions that were performed. 
+
+
+#### Question 3 (b)
+
+In this part of the question, we want to re-calculate the upper and lower bounds on the 95% confidence interval, but instead of calculating them inside each iteration of the modeling loop, we want to use the summary statistics about our data in addition to the estimated slopes to find the upper and lower bounds. This should theoretically be much faster and give us very similar results to the upper and lower bounds on the 95% confidence interval found above. 
+
+- **Define r^2**  
+
+Part of this equation retuires **r** which I'm assuming is the correlation coefficient. We've seen this before in this class! There's a native `r` function that can give us the correlation coefficient, so we can calculate all of the **r** values here: 
+```{r}
+# do we need to do this without a loop? I'm not sure how I could do that...
+r <- 0
+std_x <- 0
+for (i in 1:50){
+  r[i] <- cor(y, reducedat[i,], method = "pearson")
+  std_x[i] <- sd(reducedat[i,])
+}
+r_squared <- r^2
+```
+
+
+- **Define n**  
+
+Here we can define the sample size: **n**  Note that unlike **r^2**, **n** is a scalar, not a vector. 
+```{r}
+n <- 21 # length(reducedat[,1])
 ```
 
 
 
+- **Define sample standard deviation**  
+
+Here we can define the sample standard deviation and square it to get Sx^2: 
+```{r}
+# do we need to do this without a loop? I'm not sure how I could do that...
+std_x <- 0
+for (i in 1:50){
+  std_x[i] <- sd(reducedat[i,])
+}
+std_x_squared <- std_x^2
+```
+
+
+- **Define standard deviation of the response**  
+
+Here we can define the standard deviation of our response variable **y**and square it to get Sy^2: 
+```{r}
+std_y <- sd(y)
+std_y_squared <- std_y^2
+```
+
+- **Define slopes (b)**  
+
+We already calculated the slopes above, so lets just define a new variable called **b** that represents our 50 slopes: 
+```{r}
+b <- results$slope
+```
+
+
+And finally we have all the components we need to calculate the upper and lower bounds on the confidence interval! Let's do that now: 
+```{r}
+# define the numerator 
+num <- (1 - r_squared) * std_y_squared
+
+# define the denominator 
+denom <- (n - 2) * std_x_squared
+
+bound_level <- 1.96*(sqrt(num/denom))
+
+CI_2.5_new <- b - bound_level
+CI_97.5_new <- b + bound_level
+
+results_new <- data.frame(b, CI_2.5_new, CI_97.5_new)
+results_new
+```
+Now we can see how well we did! Lets find the difference between our old upper and lower bounds, and the new upper and lower bounds. 
+```{r}
+sum(results$CI_2.5 - results_new$CI_2.5_new)
+```
+
+We see here that the lower bounds match up almost perfectly. 
+
+```{r}
+sum(results$CI_97.5 - results_new$CI_97.5_new)
+```
+
+We see here that the upper bounds match up almost perfectly as well. In addition, we can plot the lower and upper bounds against eachother to make sure we get a straight line. 
+
+```{r}
+plot(results$CI_97.5, results_new$CI_97.5_new)
+```
+```{r}
+plot(results$CI_2.5, results_new$CI_2.5_new)
+```
+
+And indeed we do! Great, all of this means that the 95% confidence interval we found in problem 3(a) matches the one we calculated in problem 3(b). 
+
+### Question 3 (c) 
+Please see the attached Excel sheet for the solution to 3(c). 
