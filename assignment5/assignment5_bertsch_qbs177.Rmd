@@ -1,0 +1,168 @@
+---
+title: "Assignment 5 - QBS 177"
+output: html_notebook
+---
+
+Spencer Bertsch  
+Feb. 2022
+
+------------
+
+Some helpful commands:  
+* Insert a new code chunk: *Cmd+Option+I*  
+* Run a code cell: *Cmd+Shift+Enter*  
+* Preview the notebook HTML file: *Cmd+Shift+K*  
+
+### Resources
+To figure out how LDA worked and to successfully implement it in R I read some articles and watched a few youtube videos on the topic. These resources helped me understand the mechanics of how LDA works and how to implement it - see resources below:  
+
+1. sthda.com/english/wiki/scatter-plot-matrices-r-base-graphs
+2. https://en.wikipedia.org/wiki/Linear_discriminant_analysis
+3. https://stats.stackexchange.com/questions/123490/what-is-the-correct-formula-for-between-class-scatter-matrix-in-lda
+4. https://www.youtube.com/watch?v=azXCzI57Yfc&ab_channel=StatQuestwithJoshStarmer
+5. https://www.cs.cmu.edu/~tanja/Lectures/JRTkDoc/OldDoc/lda/lda_main.html
+6. https://goelhardik.github.io/2016/10/04/fishers-lda/
+7. https://sthalles.github.io/fisher-linear-discriminant/
+
+^ Number 7 was particularly helpful. 
+
+### Imports 
+```{r}
+library(glue)
+library(qqman)
+library(klaR) 
+```
+
+Import the Iris dataset here: 
+```{r}
+data(iris)
+head(iris)
+```
+
+We can now visualize our data and the correlation coefficients between each of the columns in the iris dataset. 
+```{r}
+#<code source for this cell> sthda.com/english/wiki/scatter-plot-matrices-r-base-graphs
+my_cols <- c("#00AFBB", "#E7B800", "#FC4E07")  
+# Correlation panel
+panel.cor <- function(x, y){
+    usr <- par("usr"); on.exit(par(usr))
+    par(usr = c(0, 1, 0, 1))
+    r <- round(cor(x, y), digits=2)
+    txt <- paste0("R = ", r)
+    cex.cor <- 0.8/strwidth(txt)
+    text(0.5, 0.5, txt, cex = cex.cor * r)
+}
+# Customize upper panel
+upper.panel<-function(x, y){
+  points(x,y, pch = 19, col = my_cols[iris$Species])
+}
+# Create the plots
+pairs(iris[,1:4], 
+      lower.panel = panel.cor,
+      upper.panel = upper.panel)
+```
+
+We can also use the `partimat` function to look at the partition plots for the iris dataset. This dataset is used commonly for toy examples because it's small, easy to visualize, and can be used for clustering or classification applications. 
+```{r}
+
+partimat(Species ~ ., data = iris, method = "lda")
+# partimat(Species ~ ., data = iris, method = "Qda")
+```
+
+
+# Finding Scatter Matrices
+
+We can now move onto our first task of finding the between class scatter matrix **Sw** and the within-class scatter matrix **Sb**. 
+
+```{r}
+# define the number of samples for the i'th variable 
+Ni <- 50  # <-- the number of samples in each species 
+
+# define the CP vector 
+iris_data <- iris[, 1:4]
+# loop over the 4 columns in the iris data set to create the 1x4 CP vector 
+CP <- 0
+for(i in 1:ncol(iris_data)) {    
+  x_bar <- mean(iris_data[ , i])
+  CP[i] <- x_bar
+}
+
+print(CP)
+```
+
+Just to make sure we did this the correct way, let's calculate the CP vector another way: 
+```{r}
+cp1 <- mean(iris[, 1])
+cp2 <- mean(iris[, 2])
+cp3 <- mean(iris[, 3])
+cp4 <- mean(iris[, 4])
+CP <- c(cp1, cp2, cp3, cp4)
+print(CP)
+```
+Ok we're looking good.  
+
+Above we can see the column means: CP. These are simply the mean of each of the four columns in the iris data set corresponding to the mean value of the sepal length, the mean value of the sepal width, the mean value of the petal length, and the mean value of the petal width. 
+
+
+We now want to calculate the required ui vectors (in this case it will be ui_1, ui_2, and ui_3)
+```{r}
+
+mu_df <- data.frame('c1'=c(0),
+                    'c2'=c(0),
+                    'c3'=c(0), 
+                    'c4'=c(0))
+
+species_list <- c('setosa', 'versicolor', 'virginica')
+
+for (i in 1:3){
+  # define the current species 
+  curr_species <- species_list[i]
+  
+  subset_iris <- subset(iris, Species == curr_species)
+  
+  # create the ui vector for this species (this can also be achieved using another loop)
+  ui1 <- mean(subset_iris[, 1])
+  ui2 <- mean(subset_iris[, 2])
+  ui3 <- mean(subset_iris[, 3])
+  ui4 <- mean(subset_iris[, 4])
+  ui <- c(ui1, ui2, ui3, ui4)
+  
+  # create a dataframe out of our mu_i vector 
+  ui_to_append <- t(data.frame(ui))
+  colnames(ui_to_append) <- c('c1','c2','c3', 'c4')
+  
+  # append it to the df outside the loop
+  mu_df <- rbind(mu_df, ui_to_append)
+}
+
+# create the mu vectors 
+mu1 <- as.matrix(mu_df[2, ])
+mu2 <- as.matrix(mu_df[3, ])
+mu3 <- as.matrix(mu_df[4, ])
+
+print(mu1)
+print(mu2)
+print(mu3)
+```
+
+We can see the three vectors above that we need to multiply with CP to get the SB matrix 
+
+
+## Create the SB matrix: 
+```{r}
+# we can dow define the SB matrix: 
+SB <- (Ni * t(mu1 - CP)%*%(mu1 - CP)) + (Ni * t(mu2 - CP)%*%(mu2 - CP)) + (Ni * t(mu3 - CP)%*%(mu3 - CP))
+SB
+```
+
+## Create the SW Matrix 
+
+The good news here is that it looks like we need the mean of each feature over each sample which is nice because we already found those in the previous section. 
+
+
+
+
+
+
+
+
