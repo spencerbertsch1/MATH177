@@ -1,0 +1,165 @@
+---
+title: "QBS 177 Final Project - Hemorrhage Research"
+output: html_notebook
+---
+
+Spencer Bertsch  
+Feb. 2022
+
+------------
+
+Some helpful commands:  
+* Insert a new code chunk: *Cmd+Option+I*  
+* Run a code cell: *Cmd+Shift+Enter*  
+* Preview the notebook HTML file: *Cmd+Shift+K*  
+
+
+### Imports 
+```{r}
+library(glue)
+library(glmnet)
+```
+
+First we need to change our current working directory to the correct directory for Assignment 3
+```{r}
+setwd('/Users/spencerbertsch/Desktop/dev/phd_courses/MATH177/final_project')
+getwd()
+```
+
+Now we need to import our data for a single sensor. The data set is divided into **train** and **test**, so we need to load both of those files into memory as r data frames. 
+```{r}
+df <- read.csv("log_lasso_exports/df_log_lasso_swisstom_thorax.csv")
+```
+
+
+Great, now that our data is imported, we need to split it into our four separate data frames representing X_train, y_train, X_test, and y_test. 
+```{r}
+
+# define X_df and y_df
+y_df <- as.matrix(df[,100])
+X_df <- as.matrix(df[,2:99])
+
+```
+
+
+We can now apply the binomial elastic net model to the training data using the glmnet r library. 
+```{r}
+fit <- glmnet(X_df, y_df, family = "binomial")
+```
+
+We can also use cvfit to use cross validation on our training data. 
+```{r}
+cvfit <- cv.glmnet(X_df, y_df, family = "binomial", type.measure = "class")
+```
+We can now plot the results from our cross validation model. 
+```{r}
+plot(cvfit)
+```
+
+# Find Columns to Model 
+
+We have two data sets with the following dimensions: 
+df: [272 x 98]
+
+We now want to create an empty matrix filled with zeros so that we can populate the matrix later on. We can do that with the `matrix` command in r. We want out matrix to have 98 rows and 100 columns. 
+
+```{r}
+# create the coefout matrix with dimensions [7399 x 100] - initialize the matrix as a zero matrix 
+coefout <- matrix(0, 98, 100)
+```
+
+Now that we have our coefout matrix initialized, we can run the loop that populates it. 
+
+```{r}
+# loop 100 times, once for each of the trials 
+start.time <- Sys.time()
+iterations <- 50 # <-- we can always change this to 100 for more confidence 
+  for (i in 1:iterations){ 
+  
+    # create an array of integers that represent the sample IDs for 180 samples
+    id <- sample(1:272, 180)
+    
+    # subset out training data to only include the samples chosen above 
+    data1 <- X_df[id, ]
+    
+    # we can now isolate the column that contains the survival times (I assume years survived)
+    response <- y_df[id, ]
+    
+    # we now convert our x_train subset into a matrix
+    x <- as.matrix(data1)
+    
+    # here we fit the binomial Lasso model 
+    fit2 <- glmnet(x, response, family = "binomial")
+    
+    # and here we perform a cross validation for our lasso model across many values for lambda.
+    # just because we use Lasso here doesn't mean we know the best value for Lambda (that's what we find here)
+    cvfit = cv.glmnet(x, response, family = "binomial", type.measure = "class")
+    
+    # some optimal plotting and data inspection - we don't want to do this at each iteration in the loop
+    #plot(cvfit)
+    #cvfit$lambda.min
+    
+    # here we find the coefficient values for our Lasso model. Remember this is Lasso, not Ridge! So many 
+    # of the values here should be zero 
+    coef.min = coef(cvfit, s = "lambda.min")[-1]
+    
+    # and lastly we can take the coefficients that are NOT zero and add them to the coefout outside of the loop
+    coefout[,i] <- as.numeric(coef.min!=0)
+    
+    # we can use these two lines to find the coefficients that were non-zero 
+    #active.min = which(coef.min != 0)
+    #index.min = coef.min[active.min]
+
+  }
+
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+print(time.taken)
+```
+
+
+So not only are we examining which of the 98 coefficients were driven to zero, but we repeat the experiment with different, random ~2/3 subsets of the training data 100 times and examine the performance. 
+
+We can then find the mean or the sum of the columns in our coefout matrix and sort the results to find the columns that were used the most by the logistic lasso model. 
+
+
+```{r}
+
+# define K to limit the number of columns kept 
+K = 5
+
+# here we take the sum along the columns of the coefout matrix 
+# coeffout1 gives us a vector of length 98 in which we have a value for each predictor variable. The larger 
+# the value, the more times that predictor was chosen by Lasso during the 100 trials in the previous step. 
+coefout1 <- apply(coefout, 1, sum)
+
+# here we use the value of K to only take the top (most important) predictors for use in the stepwise 
+# regression model 
+# we only keep values here if they were chosen by more than K trials of our Lasso model 
+active.min = which(coefout1>K)  
+
+```
+
+
+We can now find and report the 'best' predictor variables found by Lasso. We can do this by simply sorting our coefout1 vector and finding the corresponding indices for each of the max values. 
+
+```{r}
+# create a data frame with an index storing values of Lasso coefficient values 
+best_predictors <- data.frame(feature_index_number = c(1:length(coefout1)), Lasso_Selections = coefout1)
+
+# we can now sort the dataframe based on the number of times each gene was chosen and display the best ones
+best_predictors <- best_predictors[order(best_predictors$Lasso_Selections, decreasing=TRUE), ]
+head(best_predictors, 10)
+```
+
+And lastly, we can find the original features that correspond to the selected features: 
+```{r}
+# show the top ten features
+predictors_to_keep <- 10
+top_predictors <- best_predictors$feature_index_number[1:predictors_to_keep]
+
+colnames(X_df[, top_predictors])
+```
+
+And that's it! Now we can use this subset of features in our modeling pipeline. 
+
